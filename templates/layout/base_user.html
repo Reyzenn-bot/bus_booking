@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BusBook - Online Bus Ticket Booking{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- CSS Style ជាមួយ Media Queries ក្នុង File HTML ផ្ទាល់ -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+        }
+
+        /* Responsive Media Queries សម្រាប់ User Side */
+        @media (max-width: 991.98px) {
+            .navbar-nav {
+                padding-top: 15px;
+            }
+            .hero-banner {
+                padding: 40px 15px !important;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .search-box {
+                padding: 15px !important;
+            }
+            .bus-card-body {
+                flex-direction: column;
+                text-align: center;
+            }
+            .bus-price {
+                font-size: 1.25rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center text-primary fw-bold fs-4" href="{{ url_for('home') }}">
+                <i class="fa-solid fa-bus-simple fs-3 me-2"></i> BusBook
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="userNavbar">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium">
+                    <li class="nav-item me-3">
+                        <a class="nav-link active" href="{{ url_for('home') }}">
+                            <i class="fa-solid fa-house me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link text-secondary" href="#">
+                            <i class="fa-solid fa-ticket me-1"></i> Book Ticket
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link text-secondary" href="#">
+                            <i class="fa-solid fa-list-check me-1"></i> My Bookings
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link text-secondary" href="#">
+                            <i class="fa-regular fa-user me-1"></i> Profile
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    {% if session.get('user_id') %}
+                        <div class="dropdown">
+                            <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
+                                <span>{{ session.get('user_name', 'User') }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item" href="#"><i class="fa-regular fa-id-card me-2"></i>My Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary px-3 rounded-pill">Login</a>
+                        <a href="#" class="btn btn-primary px-3 rounded-pill">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top py-4 mt-5">
+        <div class="container text-center text-muted fs-7">
+            <p class="mb-0">BusBook Panel &copy; 2026 All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
