@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BusBook Admin Panel{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Style ជាមួយ Media Queries សម្រាប់ Admin Sidebar & Layout -->
+    <style>
+        body { 
+            background-color: #f4f6f9; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        .sidebar { 
+            width: 250px; 
+            min-height: 100vh; 
+            background-color: #0f172a; 
+            color: #fff; 
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link { 
+            color: #94a3b8; 
+            padding: 12px 20px; 
+            font-weight: 500; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { 
+            color: #fff; 
+            background-color: #2563eb; 
+            border-radius: 8px; 
+        }
+        .main-content { 
+            flex: 1; 
+            min-width: 0; 
+        }
+        .topbar { 
+            background-color: #fff; 
+            border-bottom: 1px solid #e2e8f0; 
+        }
+
+        /* Media Queries សម្រាប់អេក្រង់ទូរស័ព្ទ/Tablet លើ Admin Panel */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                margin-left: -250px;
+                position: fixed;
+                z-index: 999;
+                height: 100%;
+            }
+            .sidebar.show {
+                margin-left: 0;
+            }
+            .topbar-search {
+                width: 100% !important;
+            }
+            .topbar {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="d-flex">
+    <!-- Left Sidebar -->
+    <aside class="sidebar d-flex flex-column p-3 flex-shrink-0" id="adminSidebar">
+        <a href="#" class="d-flex align-items-center gap-2 text-white text-decoration-none px-2 mb-4 fs-5 fw-bold">
+            <i class="fa-solid fa-bus-sharp text-primary"></i> BusBook Admin
+        </a>
+
+        <ul class="nav nav-pills flex-column mb-auto gap-1">
+            <li class="nav-item">
+                <a href="#" class="nav-link active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            </li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-ticket"></i> Bookings</a></li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-bus"></i> Buses</a></li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-route"></i> Routes</a></li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-users"></i> Passengers</a></li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-user-gear"></i> Users</a></li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-chart-line"></i> Reports</a></li>
+            <li><a href="#" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+
+        <div class="border-top border-secondary pt-3 mt-auto">
+            <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content d-flex flex-column">
+        <!-- Topbar -->
+        <header class="topbar px-4 py-3 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border-0" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                <div class="input-group topbar-search" style="width: 320px;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" class="form-control bg-light border-0" placeholder="Search bookings, passengers, buses...">
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
+                        <span class="fw-medium">Admin</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <div class="p-4">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle Sidebar លើ Mobile
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+        document.getElementById('adminSidebar').classList.toggle('show');
+    });
+</script>
+</body>
+</html>
