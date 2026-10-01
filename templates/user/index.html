@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container my-4">
 
-    <!-- 1. Hero Banner Section -->
+    <!-- Hero Banner -->
     <div class="card bg-primary text-white p-4 mb-4 rounded-4 shadow-sm border-0 position-relative overflow-hidden">
         <div class="row align-items-center py-3">
             <div class="col-lg-8">
@@ -15,11 +15,11 @@
         </div>
     </div>
 
-    <!-- 2. Search Form Section (Dynamic Routes) -->
+    <!-- Search Form -->
     <div class="card p-3 shadow-sm border-0 rounded-4 mb-4 bg-white">
         <form action="{{ url_for('user.search') }}" method="GET" class="row g-2 align-items-center">
 
-            <!-- From Dropdown -->
+            <!-- Origin -->
             <div class="col-md-3">
                 <label class="form-label text-muted small fw-bold mb-1">
                     <i class="fa-solid fa-location-dot text-danger me-1"></i> From
@@ -34,7 +34,7 @@
                 </select>
             </div>
 
-            <!-- To Dropdown -->
+            <!-- Destination -->
             <div class="col-md-3">
                 <label class="form-label text-muted small fw-bold mb-1">
                     <i class="fa-solid fa-location-crosshairs text-primary me-1"></i> To
@@ -49,7 +49,7 @@
                 </select>
             </div>
 
-            <!-- Departure Date -->
+            <!-- Date -->
             <div class="col-md-3">
                 <label class="form-label text-muted small fw-bold mb-1">
                     <i class="fa-regular fa-calendar-days me-1"></i> Departure Date
@@ -58,7 +58,6 @@
                     value="{{ request.args.get('date', '') }}">
             </div>
 
-            <!-- Search Button -->
             <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-3">
                     <i class="fa-solid fa-magnifying-glass me-2"></i> Search Buses
@@ -67,10 +66,8 @@
         </form>
     </div>
 
-    <!-- 3. Main Content: Available Buses & Your Booking -->
+    <!-- Available Buses List -->
     <div class="row g-4">
-
-        <!-- LEFT SIDE: Available Buses Loop -->
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Available Buses</h5>
@@ -81,22 +78,16 @@
             {% for schedule in schedules %}
             <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
                 <div class="row align-items-center g-3">
-                    <!-- Bus Image (Dynamic URL from Table buses) -->
                     <div class="col-md-3">
-                        <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else (schedule.image or 'https://via.placeholder.com/150?text=Bus+Image') }}"
-                            class="img-fluid rounded-3 object-fit-cover" alt="Bus Image"
-                            style="height: 100px; width: 100%;">
+                        <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
+                            class="img-fluid rounded-3 object-fit-cover" alt="Bus Image" style="height: 100px; width: 100%;">
                     </div>
 
-                    <!-- Bus Info & Logo -->
                     <div class="col-md-5">
                         <div class="d-flex align-items-center gap-2 mb-1">
-                            {% if schedule.bus and schedule.bus.logo %}
-                                <img src="{{ schedule.bus.logo }}" alt="Logo" class="rounded-1" style="width: 24px; height: 24px; object-fit: contain;">
-                            {% endif %}
-                            <h6 class="fw-bold mb-0">{{ schedule.name }}</h6>
+                            <h6 class="fw-bold mb-0">{{ schedule.bus.name }}</h6>
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8">
-                                {{ schedule.type }}
+                                {{ schedule.bus.type }}
                             </span>
                         </div>
                         <div class="d-flex align-items-center gap-2 text-dark fw-bold my-1">
@@ -105,17 +96,15 @@
                             <span>{{ schedule.arrival_time }}</span>
                         </div>
                         <p class="text-muted small mb-0">
-                            <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.origin }} &rarr; {{ schedule.destination }}
+                            <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.route.origin }} &rarr; {{ schedule.route.destination }}
                         </p>
                     </div>
 
-                    <!-- Price & View Seats Button -->
                     <div class="col-md-4 text-md-end border-start-md">
                         <div class="mb-2">
                             <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
                             <span class="text-muted small">/ person</span>
                         </div>
-
                         <a href="{{ url_for('user.home', select_id=schedule.id) }}"
                             class="btn btn-outline-primary fw-medium rounded-pill px-4">
                             <i class="fa-solid fa-chair me-1"></i> View Seats
@@ -130,33 +119,27 @@
                 <h6>No buses available for this route or date.</h6>
             </div>
             {% endif %}
-
         </div>
 
-        <!-- RIGHT SIDE: Your Booking Sidebar -->
+        <!-- Sidebar Booking -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 90px;">
                 <h5 class="fw-bold mb-3">Your Booking</h5>
 
                 {% if selected_bus %}
                 <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-                    <img src="{{ selected_bus.bus.image if (selected_bus.bus and selected_bus.bus.image) else (selected_bus.image or 'https://via.placeholder.com/150?text=Bus+Image') }}"
+                    <img src="{{ selected_bus.bus.image if (selected_bus.bus and selected_bus.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
                         class="rounded-3 object-fit-cover" width="60" height="50" alt="Bus">
                     <div>
-                        <div class="d-flex align-items-center gap-1">
-                            {% if selected_bus.bus and selected_bus.bus.logo %}
-                                <img src="{{ selected_bus.bus.logo }}" alt="Logo" style="width: 18px; height: 18px; object-fit: contain;">
-                            {% endif %}
-                            <h6 class="fw-bold mb-0">{{ selected_bus.name }}</h6>
-                        </div>
-                        <span class="badge bg-light text-dark border fs-8 mt-1">{{ selected_bus.type }}</span>
+                        <h6 class="fw-bold mb-0">{{ selected_bus.bus.name }}</h6>
+                        <span class="badge bg-light text-dark border fs-8 mt-1">{{ selected_bus.bus.type }}</span>
                     </div>
                 </div>
 
                 <div class="small text-muted mb-3">
                     <div class="d-flex justify-content-between mb-1">
                         <span>Route:</span>
-                        <span class="fw-bold text-dark">{{ selected_bus.origin }} &rarr; {{ selected_bus.destination }}</span>
+                        <span class="fw-bold text-dark">{{ selected_bus.route.origin }} &rarr; {{ selected_bus.route.destination }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1">
                         <span>Departure Time:</span>
@@ -178,7 +161,6 @@
                 <a href="#" class="btn btn-primary w-100 fw-bold py-2 rounded-3">
                     Proceed to Payment <i class="fa-solid fa-arrow-right ms-1"></i>
                 </a>
-
                 {% else %}
                 <div class="text-center py-5 text-muted">
                     <i class="fa-solid fa-ticket-simple fs-1 text-light-subtle mb-2"></i>
@@ -186,10 +168,8 @@
                     <p class="small text-secondary mb-0">Please click <b>"View Seats"</b> on any available bus to proceed.</p>
                 </div>
                 {% endif %}
-
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}

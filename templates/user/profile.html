@@ -7,7 +7,6 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
 
-            <!-- Flash Alert Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -20,7 +19,6 @@
             {% endwith %}
 
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <!-- Cover & Avatar Header -->
                 <div class="bg-primary p-4 text-center text-white position-relative">
                     <div class="mb-2">
                         <i class="fa-solid fa-circle-user display-3 text-white-50"></i>
@@ -34,16 +32,13 @@
                         <i class="fa-solid fa-user-pen text-primary me-2"></i>Edit Profile Information
                     </h6>
 
-                    <!-- Profile Update Form -->
                     <form action="{{ url_for('user.profile') }}" method="POST">
-                        <!-- Name Input -->
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold mb-1">Full Name</label>
                             <input type="text" name="name" class="form-control rounded-3"
                                 value="{{ current_user.name or '' }}" required>
                         </div>
 
-                        <!-- Email Input (Readonly) -->
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold mb-1">Email Address</label>
                             <input type="email" name="email" class="form-control rounded-3 bg-light"
@@ -51,7 +46,6 @@
                             <small class="text-muted fs-8">Email cannot be changed.</small>
                         </div>
 
-                        <!-- Phone Input -->
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold mb-1">Phone Number</label>
                             <input type="tel" name="phone" class="form-control rounded-3"
@@ -64,14 +58,12 @@
                             <i class="fa-solid fa-lock text-primary me-2"></i>Change Password (Optional)
                         </h6>
 
-                        <!-- Password Input -->
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold mb-1">New Password</label>
                             <input type="password" name="password" class="form-control rounded-3"
                                 placeholder="Leave blank if you don't want to change">
                         </div>
 
-                        <!-- Save Button -->
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-primary fw-bold py-2 rounded-3">
                                 <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes

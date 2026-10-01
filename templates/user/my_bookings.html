@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container my-4">
 
-    <!-- Page Header -->
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3 class="fw-bold mb-1">My Bookings</h3>
@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    <!-- Booking List Loop -->
+    <!-- Booking List -->
     {% if bookings %}
     <div class="row g-3">
         {% for booking in bookings %}
@@ -25,36 +25,33 @@
                 <div class="card-body p-4">
                     <div class="row align-items-center g-3">
 
-                        <!-- 1. Bus Image & Basic Details -->
+                        <!-- Bus Info -->
                         <div class="col-lg-3 col-md-4">
                             <div class="d-flex align-items-center gap-3">
-                                <img src="{{ (booking.schedule.bus.image if booking.schedule and booking.schedule.bus else booking.image) or 'https://via.placeholder.com/150?text=Bus+Image' }}"
-                                    class="rounded-3 object-fit-cover" alt="Bus Image"
-                                    style="width: 80px; height: 70px;">
+                                <img src="{{ booking.schedule.bus.image if (booking.schedule and booking.schedule.bus) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
+                                    class="rounded-3 object-fit-cover" alt="Bus Image" style="width: 80px; height: 70px;">
                                 <div>
-                                    <span
-                                        class="badge {% if booking.booking_status == 'confirmed' %}bg-success-subtle text-success border border-success-subtle{% elif booking.booking_status == 'pending' %}bg-warning-subtle text-warning border border-warning-subtle{% else %}bg-danger-subtle text-danger border border-danger-subtle{% endif %} rounded-pill mb-1 text-capitalize fs-8">
+                                    <span class="badge {% if booking.booking_status == 'confirmed' %}bg-success-subtle text-success border border-success-subtle{% elif booking.booking_status == 'pending' %}bg-warning-subtle text-warning border border-warning-subtle{% else %}bg-danger-subtle text-danger border border-danger-subtle{% endif %} rounded-pill mb-1 text-capitalize fs-8">
                                         {{ booking.booking_status or 'Confirmed' }}
                                     </span>
-                                    <h6 class="fw-bold mb-0 text-truncate" style="max-width: 150px;">{{ booking.name }}
+                                    <h6 class="fw-bold mb-0 text-truncate" style="max-width: 150px;">
+                                        {{ booking.schedule.bus.name if booking.schedule else 'Bus Name' }}
                                     </h6>
-                                    <small class="text-muted">{{ booking.type }}</small>
+                                    <small class="text-muted">{{ booking.schedule.bus.type if booking.schedule else '' }}</small>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 2. Route & Travel Date Info -->
+                        <!-- Route & Travel Date -->
                         <div class="col-lg-4 col-md-5">
                             <div class="mb-1">
-                                <span class="fw-bold text-dark fs-6">{{ booking.origin }}</span>
+                                <span class="fw-bold text-dark fs-6">{{ booking.schedule.route.origin if booking.schedule else '' }}</span>
                                 <i class="fa-solid fa-arrow-right text-muted mx-2 fs-7"></i>
-                                <span class="fw-bold text-dark fs-6">{{ booking.destination }}</span>
+                                <span class="fw-bold text-dark fs-6">{{ booking.schedule.route.destination if booking.schedule else '' }}</span>
                             </div>
                             <div class="small text-muted d-flex align-items-center gap-3">
-                                <span><i class="fa-regular fa-calendar text-primary me-1"></i> {{ booking.travel_date
-                                    }}</span>
-                                <span><i class="fa-regular fa-clock text-primary me-1"></i> {{ booking.departure_time
-                                    }}</span>
+                                <span><i class="fa-regular fa-calendar text-primary me-1"></i> {{ booking.travel_date }}</span>
+                                <span><i class="fa-regular fa-clock text-primary me-1"></i> {{ booking.schedule.departure_time if booking.schedule else '' }}</span>
                             </div>
                             <div class="mt-1">
                                 <small class="badge bg-light text-dark border">
@@ -63,15 +60,14 @@
                             </div>
                         </div>
 
-                        <!-- 3. Price & Ticket ID -->
+                        <!-- Price -->
                         <div class="col-lg-3 col-md-3 text-md-end">
-                            <span class="text-muted small d-block">Booking ID: #BK-{{ "%04d"|format(booking.id)
-                                }}</span>
+                            <span class="text-muted small d-block">Booking ID: #BK-{{ "%04d"|format(booking.id) }}</span>
                             <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(booking.total_price) }}</span>
                             <small class="text-muted d-block fs-8">Total Paid</small>
                         </div>
 
-                        <!-- 4. Actions -->
+                        <!-- Details Collapse Button -->
                         <div class="col-lg-2 col-md-12 text-lg-end border-start-lg pt-2 pt-lg-0">
                             <button class="btn btn-light btn-sm rounded-pill px-3 fw-medium w-100 text-secondary border"
                                 type="button" data-bs-toggle="collapse" data-bs-target="#ticketDetails{{ booking.id }}">
@@ -81,16 +77,16 @@
 
                     </div>
 
-                    <!-- Collapse Details Section -->
+                    <!-- Details Collapse -->
                     <div class="collapse mt-3 pt-3 border-top" id="ticketDetails{{ booking.id }}">
                         <div class="row g-2 small text-muted">
                             <div class="col-md-3">
                                 <span>Departure Time:</span>
-                                <p class="fw-bold text-dark mb-0">{{ booking.departure_time }}</p>
+                                <p class="fw-bold text-dark mb-0">{{ booking.schedule.departure_time if booking.schedule else '-' }}</p>
                             </div>
                             <div class="col-md-3">
                                 <span>Arrival Time:</span>
-                                <p class="fw-bold text-dark mb-0">{{ booking.arrival_time }}</p>
+                                <p class="fw-bold text-dark mb-0">{{ booking.schedule.arrival_time if booking.schedule else '-' }}</p>
                             </div>
                             <div class="col-md-3">
                                 <span>Ticket Price / Pax:</span>
