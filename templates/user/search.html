@@ -99,7 +99,7 @@
                             <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
                             <span class="text-muted small">/ person</span>
                         </div>
-                        <a href="{{ url_for('user.home', select_id=schedule.id) }}"
+                        <a href="{{ url_for('user.book_ticket', schedule_id=schedule.id) }}"
                             class="btn btn-outline-primary fw-medium rounded-pill px-4">
                             <i class="fa-solid fa-chair me-1"></i> View Seats
                         </a>

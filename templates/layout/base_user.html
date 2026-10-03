@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+
     <!-- CSS Style ជាមួយ Media Queries ក្នុង File HTML ផ្ទាល់ -->
     <style>
         :root {
@@ -27,6 +28,7 @@
             .navbar-nav {
                 padding-top: 15px;
             }
+
             .hero-banner {
                 padding: 40px 15px !important;
                 text-align: center;
@@ -37,22 +39,26 @@
             .search-box {
                 padding: 15px !important;
             }
+
             .bus-card-body {
                 flex-direction: column;
                 text-align: center;
             }
+
             .bus-price {
                 font-size: 1.25rem !important;
             }
         }
     </style>
 </head>
+
 <body class="bg-light">
 
     <!-- Header / Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center text-primary fw-bold fs-4" href="{{ url_for('home') }}">
+            <a class="navbar-brand d-flex align-items-center text-primary fw-bold fs-4"
+                href="{{ url_for('user.home') }}">
                 <i class="fa-solid fa-bus-simple fs-3 me-2"></i> BusBookCambo
             </a>
 
@@ -63,22 +69,22 @@
             <div class="collapse navbar-collapse" id="userNavbar">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium">
                     <li class="nav-item me-3">
-                        <a class="nav-link active" href="{{ url_for('home') }}">
+                        <a class="nav-link active" href="{{ url_for('user.home') }}">
                             <i class="fa-solid fa-house me-1"></i> Home
                         </a>
                     </li>
                     <li class="nav-item me-3">
-                        <a class="nav-link text-secondary" href="#">
-                            <i class="fa-solid fa-ticket me-1"></i> Book Ticket
+                        <a class="nav-link text-secondary" href="{{ url_for('user.search') }}">
+                            <i class="fa-solid fa-ticket me-1"></i> Search Bus
                         </a>
                     </li>
                     <li class="nav-item me-3">
-                        <a class="nav-link text-secondary" href="#">
+                        <a class="nav-link text-secondary" href="{{ url_for('booking.my_bookings') }}">
                             <i class="fa-solid fa-list-check me-1"></i> My Bookings
                         </a>
                     </li>
                     <li class="nav-item me-3">
-                        <a class="nav-link text-secondary" href="#">
+                        <a class="nav-link text-secondary" href="{{ url_for('user.profile') }}">
                             <i class="fa-regular fa-user me-1"></i> Profile
                         </a>
                     </li>
@@ -86,20 +92,25 @@
 
                 <div class="d-flex align-items-center gap-3">
                     {% if session.get('user_id') %}
-                        <div class="dropdown">
-                            <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3" type="button" data-bs-toggle="dropdown">
-                                <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
-                                <span>{{ session.get('user_name', 'User') }}</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                <li><a class="dropdown-item" href="#"><i class="fa-regular fa-id-card me-2"></i>My Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
-                            </ul>
-                        </div>
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3"
+                            type="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
+                            <span>{{ session.get('user_name', 'User') }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="{{ url_for('user.profile') }}"><i
+                                        class="fa-regular fa-id-card me-2"></i>My Profile</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i
+                                        class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
                     {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary px-3 rounded-pill">Login</a>
-                        <a href="#" class="btn btn-primary px-3 rounded-pill">Register</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary px-3 rounded-pill">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary px-3 rounded-pill">Register</a>
                     {% endif %}
                 </div>
             </div>
@@ -121,4 +132,5 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
