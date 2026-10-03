@@ -24,6 +24,8 @@ app.register_blueprint(schedule_bp)
 app.register_blueprint(booking_bp)
 app.register_blueprint(user_bp)
 
-
+with app.app_context():
+    db.create_all()  # Create tables if they don't exist
+    
 if __name__ == "__main__":
     app.run(debug=True)
