@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
@@ -5,7 +7,7 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(20), nullable=True)
@@ -41,7 +43,8 @@ class Schedule(db.Model):
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id'), nullable=False)
     departure_time = db.Column(db.Time, nullable=False)  # e.g., '2023-10-01 10:00:00'
     arrival_time = db.Column(db.Time, nullable=False)  # e.g., '2023-10-01 14:00:00'
-    price = db.Column(db.Decimal(10, 2), nullable=False)  # Price for the schedule
+    price = db.Column(db.Numeric(10, 2), nullable=False)  # Price for the schedule
+    bookings = db.relationship('Booking', backref='schedule', lazy=True)  # Relationship to Booking
 
 #5. Bookings table
 class Booking(db.Model):
@@ -52,7 +55,8 @@ class Booking(db.Model):
     travel_date = db.Column(db.Date, nullable=False)  # Date of travel
     seat_number = db.Column(db.Integer, nullable=False)  # Seat number booked
     passenger_count = db.Column(db.Integer, nullable=False)  # Number of passengers
-    ticket_price = db.Column(db.Decimal(10, 2), nullable=False)  # Total ticket price
-    service_price = db.Column(db.Decimal(10, 2), nullable=False)  # Service price
-    total_price = db.Column(db.Decimal(10, 2), nullable=False)  # Total price (ticket + service)
+    ticket_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total ticket price
+    service_price = db.Column(db.Numeric(10, 2), nullable=False)  # Service price
+    total_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total price (ticket + service)
     booking_status = db.Column(db.String(50), nullable=False, default='confirmed')  # e.g., 'pending', 'confirmed', 'cancelled'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow) # Booking creation timestamp

@@ -26,30 +26,36 @@
                     <!-- Schedule & Bus Info Summary -->
                     <div class="bg-light p-3 rounded mb-4">
                         <h5>Bus Details: {{ schedule.bus.name }} ({{ schedule.bus.type }})</h5>
-                        <p class="mb-1"><strong>Route:</strong> {{ schedule.route.origin }} &rarr; {{
-                            schedule.route.destination }}</p>
-                        <p class="mb-1"><strong>Time:</strong> {{ schedule.departure_time }} - {{ schedule.arrival_time
-                            }}</p>
-                        <p class="mb-0"><strong>Price:</strong> ${{ schedule.price }}</p>
+                        <p class="mb-1"><strong>Route:</strong> {{ schedule.route.origin }} &rarr; {{ schedule.route.destination }}</p>
+                        <p class="mb-1"><strong>Time:</strong> {{ schedule.departure_time }} - {{ schedule.arrival_time }}</p>
+                        <p class="mb-0"><strong>Price:</strong> ${{ "%.2f"|format(schedule.price) }}</p>
                     </div>
 
-                    <!-- Seat Selection Form -->
-                    <form action="{{ url_for('user.book_ticket', schedule_id=schedule.id) }}" method="POST">
+                    <!-- Travel Date Selector (GET Form to Filter Seats) -->
+                    <form method="GET" action="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}" id="dateFilterForm" class="mb-4">
+                        <label for="travel_date" class="form-label fw-bold">Select Travel Date to View Available Seats</label>
+                        <input type="date" class="form-control" id="travel_date" name="travel_date" 
+                               value="{{ travel_date_str or '' }}" onchange="document.getElementById('dateFilterForm').submit()" required>
+                    </form>
 
-                        <!-- Travel Date Input -->
-                        <div class="mb-3">
-                            <label for="travel_date" class="form-label fw-bold">Travel Date</label>
-                            <input type="date" class="form-control" id="travel_date" name="travel_date" required>
-                        </div>
+                    <!-- Seat Selection Form (POST Form) -->
+                    <form action="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}" method="POST">
+                        <input type="hidden" name="travel_date" value="{{ travel_date_str or '' }}">
 
                         <h5 class="mb-3">Choose a Seat Number (Total Seats: {{ schedule.bus.seat }})</h5>
 
-                        <!-- Dynamic Seats based on schedule.bus.seat -->
+                        {% if not travel_date_str %}
+                        <div class="alert alert-warning">
+                            <i class="fa-solid fa-circle-info me-2"></i>Please select a travel date above to see available seats.
+                        </div>
+                        {% endif %}
+
+                        <!-- Dynamic Seats -->
                         <div class="row row-cols-5 g-2 mb-4">
                             {% for i in range(1, schedule.bus.seat + 1) %}
                             <div class="col">
                                 <input type="radio" class="btn-check" name="seat_number" id="seat{{ i }}"
-                                    value="{{ i }}" {% if i in booked_seats %}disabled{% endif %} required>
+                                    value="{{ i }}" {% if i in booked_seats or not travel_date_str %}disabled{% endif %} required>
                                 <label
                                     class="btn w-100 {% if i in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
                                     for="seat{{ i }}">
@@ -60,7 +66,9 @@
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Confirm Booking</button>
+                            <button type="submit" class="btn btn-primary btn-lg" {% if not travel_date_str %}disabled{% endif %}>
+                                Confirm Booking
+                            </button>
                         </div>
                     </form>
 
