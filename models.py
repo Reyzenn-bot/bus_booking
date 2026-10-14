@@ -44,7 +44,8 @@ class Schedule(db.Model):
     departure_time = db.Column(db.Time, nullable=False)  # e.g., '2023-10-01 10:00:00'
     arrival_time = db.Column(db.Time, nullable=False)  # e.g., '2023-10-01 14:00:00'
     price = db.Column(db.Numeric(10, 2), nullable=False)  # Price for the schedule
-    bookings = db.relationship('Booking', backref='schedule', lazy=True)  # Relationship to Booking
+    bookings = db.relationship('Booking', foreign_keys='Booking.schedule_id', backref='schedule', lazy=True)  # Relationship to Booking
+    return_bookings = db.relationship('Booking', foreign_keys='Booking.return_schedule_id', backref='return_schedule', lazy=True)  # Relationship to Booking for return trips
 
 #5. Bookings table
 class Booking(db.Model):
@@ -60,3 +61,6 @@ class Booking(db.Model):
     total_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total price (ticket + service)
     booking_status = db.Column(db.String(50), nullable=False, default='confirmed')  # e.g., 'pending', 'confirmed', 'cancelled'
     created_at = db.Column(db.DateTime, default=datetime.utcnow) # Booking creation timestamp
+    trip_type = db.Column(db.String(20), nullable=False, default='oneway')  # 'oneway' ឬ 'roundtrip'
+    return_date = db.Column(db.Date, nullable=True)  # ថ្ងៃត្រឡប់មកវិញ (បើជា Round-trip)
+    return_schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=True)  # កាលវិភាគឡានត្រឡប់មកវិញ (បើមាន)

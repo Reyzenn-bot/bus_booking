@@ -25,6 +25,8 @@ def search():
     origin = request.args.get('origin', '').strip()
     destination = request.args.get('destination', '').strip()
     date = request.args.get('date', '').strip()
+    trip_type = request.args.get('trip_type', 'oneway').strip()  # Default to 'oneway' if not provided
+    return_date = request.args.get('return_date', '').strip()  # For round-trip searches
 
     query = Schedule.query.join(Route)
 
@@ -34,7 +36,7 @@ def search():
         query = query.filter(Route.destination == destination)    
 
     schedules = query.all()
-    return render_template('user/search.html', routes=routes, schedules=schedules, origin=origin, destination=destination, date=date)
+    return render_template('user/search.html', routes=routes, schedules=schedules, origin=origin, destination=destination, date=date, trip_type=trip_type, return_date=return_date)
 
 # user profile
 @user_bp.route('/profile', methods=['GET', 'POST'])

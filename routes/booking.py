@@ -15,6 +15,8 @@ def book_ticket(schedule_id):
 
     # ទទួលបាន String នៃថ្ងៃខែធ្វើដំណើរពី Query Params (GET) ឬ Form (POST)
     travel_date_str = request.args.get('travel_date', '').strip() or request.form.get('travel_date', '').strip()
+    trip_type = request.args.get('trip_type', 'oneway').strip() or request.form.get('trip_type', 'oneway').strip()
+    return_date_str = request.args.get('return_date', '').strip() or request.form.get('return_date', '').strip()
 
     booked_seats = []
     if travel_date_str:
@@ -27,6 +29,8 @@ def book_ticket(schedule_id):
     if request.method == 'POST':
         selected_seat = request.form.get('seat_number')
         travel_date_input = request.form.get('travel_date')
+        trip_type_input = request.form.get('trip_type', 'oneway')
+        return_date_input = request.form.get('return_date')
 
         if not selected_seat or not travel_date_input:
             flash('Please select a seat and travel date.', 'danger')
@@ -47,18 +51,22 @@ def book_ticket(schedule_id):
         # គណនាថ្លៃសំបុត្រ
         ticket_price = float(schedule.price)
         service_fee = 1.00
+        if trip_type_input == 'roundtrip' and return_date_input:
+            ticket_price *= 2  # Double the price for round-trip
         total_price = ticket_price + service_fee
 
         new_booking = Booking(
             user_id=session['user_id'],
             schedule_id=schedule_id,
             travel_date=travel_date,
+            trip_type=trip_type_input,
+            return_date=return_date_input if trip_type_input == 'roundtrip' else None,
             seat_number=seat_num,
             passenger_count=1,
             ticket_price=ticket_price,
             service_price=service_fee,
             total_price=total_price,
-            booking_status='Confirmed'
+            booking_status='Confirmed',
         )
 
         try:

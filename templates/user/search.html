@@ -6,12 +6,25 @@
 <div class="container my-4">
 
     <!-- Search Form / Filter Section -->
-    <div class="card p-3 shadow-sm border-0 rounded-4 mb-4 bg-white">
+    <div class="card p-4 shadow-sm border-0 rounded-4 mb-4 bg-white">
+        
+        <!-- Trip Type Selection (One-way / Round-trip) -->
+        <div class="mb-3 d-flex gap-4">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="trip_type" id="oneway" value="oneway" checked onchange="toggleReturnDate()">
+                <label class="form-check-label fw-medium text-dark" for="oneway">One-way</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="trip_type" id="roundtrip" value="roundtrip" onchange="toggleReturnDate()">
+                <label class="form-check-label fw-medium text-dark" for="roundtrip">Round-trip</label>
+            </div>
+        </div>
+
         <form action="{{ url_for('user.search') }}" method="GET">
             <div class="row g-2 align-items-end">
 
                 <!-- 1. Origin (From) -->
-                <div class="col-md-3">
+                <div class="col-md">
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-solid fa-location-dot text-danger me-1"></i> From
                     </label>
@@ -26,14 +39,14 @@
                 </div>
 
                 <!-- 2. Swap Button (ប៊ូតុងប្តូរទិសដៅ) -->
-                <div class="col-md-1 text-center">
-                    <button type="button" id="swapBtn" class="btn btn-outline-secondary w-100" title="Swap From and To">
+                <div class="col-auto text-center">
+                    <button type="button" id="swapBtn" class="btn btn-outline-secondary" title="Swap From and To">
                         <i class="fa-solid fa-right-left"></i>
                     </button>
                 </div>
 
                 <!-- 3. Destination (To) -->
-                <div class="col-md-3">
+                <div class="col-md">
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-solid fa-location-crosshairs text-primary me-1"></i> To
                     </label>
@@ -48,16 +61,24 @@
                 </div>
 
                 <!-- 4. Departure Date -->
-                <div class="col-md-3">
+                <div class="col-md">
                     <label class="form-label text-muted small fw-bold mb-1">
-                        <i class="fa-regular fa-calendar-days me-1"></i> Date
+                        <i class="fa-regular fa-calendar-days me-1"></i> Departure Date
                     </label>
                     <input type="date" name="date" class="form-control border-light-subtle" value="{{ date or '' }}">
                 </div>
 
-                <!-- 5. Search / Filter Button -->
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-3">
+                <!-- 5. Return Date (រក្សាទំហំ Column ទុក ប៉ុន្តែ Disabled បើជ្រើសរើស One-way) -->
+                <div class="col-md" id="returnDateCol">
+                    <label class="form-label text-muted small fw-bold mb-1" id="returnLabel" style="opacity: 0.4;">
+                        <i class="fa-regular fa-calendar-days me-1"></i> Return Date
+                    </label>
+                    <input type="date" name="return_date" id="returnDateInput" class="form-control border-light-subtle bg-light" value="{{ request.args.get('return_date', '') }}" disabled>
+                </div>
+
+                <!-- 6. Search / Filter Button -->
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 px-4 rounded-3">
                         <i class="fa-solid fa-filter me-1"></i> Filter Results
                     </button>
                 </div>
@@ -125,8 +146,27 @@
 
 </div>
 
-<!-- JavaScript Swap Function -->
+<!-- JavaScript Functions -->
 <script>
+// បើក ឬ បិទ Return Date Input ដោយរក្សាទំហំ Column ឱ្យស្មើគ្នា
+function toggleReturnDate() {
+    const isRoundTrip = document.getElementById('roundtrip').checked;
+    const returnInput = document.getElementById('returnDateInput');
+    const returnLabel = document.getElementById('returnLabel');
+    
+    if (isRoundTrip) {
+        returnInput.removeAttribute('disabled');
+        returnInput.classList.remove('bg-light');
+        returnLabel.style.opacity = '1';
+    } else {
+        returnInput.setAttribute('disabled', 'disabled');
+        returnInput.value = '';
+        returnInput.classList.add('bg-light');
+        returnLabel.style.opacity = '0.4';
+    }
+}
+
+// ប៊ូតុង Swap Toggled
 document.getElementById('swapBtn').addEventListener('click', function() {
     const originSelect = document.getElementById('originSelect');
     const destinationSelect = document.getElementById('destinationSelect');
