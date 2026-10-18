@@ -1,20 +1,23 @@
 {% extends 'layout/base_user.html' %}
 
-{% block title %}Select Seat - BusBookCambo{% endblock %}
+{% block title %}Select Seat/Berth - CamBusBook{% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h3 class="card-title text-center mb-4 text-primary">Select Your Seat</h3>
+                    {% set is_sleeper = 'sleeper' in schedule.bus.type.lower() %}
+                    <h3 class="card-title text-center mb-4 text-primary fw-bold">
+                        Select Your {% if is_sleeper %}Berth (Bed){% else %}Seat{% endif %}
+                    </h3>
 
                     <!-- Flash Messages -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                     {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' or category == 'danger' else 'success' }} alert-dismissible fade show"
+                    <div class="alert alert-{{ 'danger' if category == 'error' or category == 'danger' else 'success' }} alert-dismissible fade show rounded-3"
                         role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -24,60 +27,527 @@
                     {% endwith %}
 
                     <!-- Schedule & Bus Info Summary -->
-                    <div class="bg-light p-3 rounded mb-4">
-                        <h5>Bus Details: {{ schedule.bus.name }} ({{ schedule.bus.type }})</h5>
-                        <p class="mb-1"><strong>Route:</strong> {{ schedule.route.origin }} &rarr; {{ schedule.route.destination }}</p>
-                        <p class="mb-1"><strong>Time:</strong> {{ schedule.departure_time }} - {{ schedule.arrival_time }}</p>
-                        <p class="mb-0"><strong>Price:</strong> ${{ "%.2f"|format(schedule.price) }}</p>
+                    <div class="bg-light p-3 rounded-4 mb-4 border">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5">
+                                <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
+                                    class="rounded-3 object-fit-cover w-100 shadow-sm" alt="Bus Image"
+                                    style="height: 150px;">
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    {% if schedule.bus.logo %}
+                                    <img src="{{ schedule.bus.logo }}" alt="Logo"
+                                        class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
+                                        style="width: 40px; height: 30px;">
+                                    {% else %}
+                                    <i class="fa-solid fa-bus text-primary"></i>
+                                    {% endif %}
+                                    <h5 class="fw-bold mb-0 text-dark">{{ schedule.bus.name }}</h5>
+                                </div>
+
+                                <div class="mb-2">
+                                    <span class="badge bg-white text-dark border">{{ schedule.bus.type }}</span>
+                                </div>
+
+                                <!-- Route Origin & Destination -->
+                                <p class="mb-1 small"><strong>Route:</strong> {{ schedule.route.origin }} &rarr; {{
+                                    schedule.route.destination }}</p>
+
+                                <!-- Time -->
+                                <p class="mb-1 small">
+                                    <strong>Time:</strong>
+                                    {{ schedule.departure_time.strftime('%I:%M %p') if schedule.departure_time else ''
+                                    }}
+                                    &rarr;
+                                    {{ schedule.arrival_time.strftime('%I:%M %p') if schedule.arrival_time else '' }}
+                                </p>
+
+                                <!-- 🌟 ទាញយក Distance និង Via ពី Route Model -->
+                                {% if schedule.route and schedule.route.distance %}
+                                <p class="mb-1 small text-muted"><strong>Distance:</strong> {{ schedule.route.distance
+                                    }} km</p>
+                                {% endif %}
+
+                                {% if schedule.route and schedule.route.via %}
+                                <p class="mb-1 small text-muted"><strong>Via:</strong> {{ schedule.route.via }}</p>
+                                {% endif %}
+
+                                {% if schedule.bus and schedule.bus.amenities %}
+                                <p class="mb-1 small text-secondary">
+                                    <i
+                                        class="fa-solid fa-circle-check text-success me-1"></i><strong>Amenities:</strong>
+                                    {{ schedule.bus.amenities }}
+                                </p>
+                                {% endif %}
+
+                                <!-- Price -->
+                                <p class="mb-0 small text-success fw-bold mt-1"><strong>Price:</strong> ${{
+                                    "%.2f"|format(schedule.price) }} / person</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Travel Date Selector (GET Form to Filter Seats) -->
-                    <form method="GET" action="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}" id="dateFilterForm" class="mb-4">
-                        <label for="travel_date" class="form-label fw-bold">Select Travel Date to View Available Seats</label>
-                        <input type="date" class="form-control" id="travel_date" name="travel_date" 
-                               value="{{ travel_date_str or '' }}" onchange="document.getElementById('dateFilterForm').submit()" required>
+                    <!-- Travel Date Selector -->
+                    <form method="GET" action="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}"
+                        id="dateFilterForm" class="mb-4">
+                        <label for="travel_date" class="form-label fw-bold small text-muted">
+                            Select Travel Date to View Available {% if is_sleeper %}Beds{% else %}Seats{% endif %}
+                        </label>
+                        <input type="date" class="form-control rounded-3" id="travel_date" name="travel_date"
+                            value="{{ travel_date_str if travel_date_str else '' }}"
+                            onchange="document.getElementById('dateFilterForm').submit()" required>
                     </form>
 
-                    <!-- Seat Selection Form (POST Form) -->
-                    <form action="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}" method="POST">
+                    <!-- Seat / Berth Selection Form -->
+                    <form action="{{ url_for('booking.passenger_info', schedule_id=schedule.id) }}" method="POST"
+                        id="bookingForm">
                         <input type="hidden" name="travel_date" value="{{ travel_date_str or '' }}">
 
-                        <h5 class="mb-3">Choose a Seat Number (Total Seats: {{ schedule.bus.seat }})</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 fs-6 fw-bold">Choose Your {% if is_sleeper %}Berth (Bed){% else %}Seat{%
+                                endif %}</h5>
+                            {% set total_passenger_seats = schedule.bus.seat - 1 %}
+                            <span class="badge bg-light text-secondary border">Total Units: {{ total_passenger_seats
+                                }}</span>
+                        </div>
 
                         {% if not travel_date_str %}
-                        <div class="alert alert-warning">
-                            <i class="fa-solid fa-circle-info me-2"></i>Please select a travel date above to see available seats.
+                        <div class="alert alert-warning rounded-3">
+                            <i class="fa-solid fa-circle-info me-2"></i>Please select a travel date above to see
+                            available {% if is_sleeper %}beds{% else %}seats{% endif %}.
                         </div>
                         {% endif %}
 
-                        <!-- Dynamic Seats -->
-                        <div class="row row-cols-5 g-2 mb-4">
-                            {% for i in range(1, schedule.bus.seat + 1) %}
-                            <div class="col">
-                                <input type="radio" class="btn-check" name="seat_number" id="seat{{ i }}"
-                                    value="{{ i }}" {% if i in booked_seats or not travel_date_str %}disabled{% endif %} required>
-                                <label
-                                    class="btn w-100 {% if i in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
-                                    for="seat{{ i }}">
-                                    {{ i }}
-                                </label>
+                        <!-- Bus Layout Container -->
+                        <div class="bus-container border p-4 rounded-4 bg-white shadow-sm mb-4 mx-auto"
+                            style="max-width: 340px;">
+
+                            <!-- Front: Driver & Door -->
+                            <div
+                                class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom text-muted">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-dharmachakra fs-2 text-primary mb-1"></i>
+                                    <div class="fs-8 fw-bold text-dark" style="font-size: 14px;">Driver</div>
+                                </div>
+                                <div class="text-center">
+                                    <i class="fa-solid fa-door-open fs-2 text-secondary mb-1"></i>
+                                    <div class="fs-8 fw-bold text-dark" style="font-size: 14px;">Door</div>
+                                </div>
                             </div>
+
+                            <!-- Dynamic Layout Check -->
+                            <div class="d-flex flex-column gap-2">
+                                {% set total_seats = schedule.bus.seat - 1 %}
+
+                                {% if is_sleeper %}
+                                <!-- SLEEPER BUS LAYOUT -->
+                                {% for row in range(0, total_seats, 3) %}
+                                <div class="row g-2 justify-content-between mb-2">
+                                    <div class="col-7 d-flex gap-2">
+                                        {% for i in range(1, 3) %}
+                                        {% set seat_num = row + i %}
+                                        {% if seat_num <= total_seats %} <div class="flex-fill">
+                                            <input type="checkbox" class="btn-check seat-checkbox" name="seat_number"
+                                                id="seat{{ seat_num }}" value="{{ seat_num }}" {% if seat_num in
+                                                booked_seats or not travel_date_str %}disabled{% endif %}>
+                                            <label
+                                                class="btn w-100 btn-sm rounded-3 seat-label {% if seat_num in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
+                                                for="seat{{ seat_num }}" data-seat="{{ seat_num }}"
+                                                style="font-size: 13px; padding: 14px 0; height: 55px;">
+                                                <i class="fa-solid fa-bed d-block fs-7 mb-1 opacity-50"></i> {{ seat_num
+                                                }}
+                                            </label>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-1 text-center text-muted align-self-center small px-0"
+                                    style="font-size: 11px; opacity: 0.4;">|</div>
+
+                                <div class="col-4 d-flex gap-2">
+                                    {% set seat_num = row + 3 %}
+                                    {% if seat_num <= total_seats %} <div class="flex-fill">
+                                        <input type="checkbox" class="btn-check seat-checkbox" name="seat_number"
+                                            id="seat{{ seat_num }}" value="{{ seat_num }}" {% if seat_num in
+                                            booked_seats or not travel_date_str %}disabled{% endif %}>
+                                        <label
+                                            class="btn w-100 btn-sm rounded-3 seat-label {% if seat_num in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
+                                            for="seat{{ seat_num }}" data-seat="{{ seat_num }}"
+                                            style="font-size: 13px; padding: 14px 0; height: 55px;">
+                                            <i class="fa-solid fa-bed d-block fs-7 mb-1 opacity-50"></i> {{ seat_num }}
+                                        </label>
+                                </div>
+                                {% else %}
+                                <div class="flex-fill text-center align-self-center border rounded-3 bg-light text-muted py-2"
+                                    style="height: 55px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                    <i class="fa-solid fa-restroom fs-6 text-secondary"></i>
+                                    <span style="font-size: 9px; font-weight: bold;">WC</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% else %}
+                        <!-- SEATER BUS LAYOUT -->
+                        {% if total_seats <= 30 %} {% for row in range(0, total_seats, 3) %} <div
+                            class="row g-2 justify-content-between mb-2">
+                            <div class="col-7 d-flex gap-2">
+                                {% for i in range(1, 3) %}
+                                {% set seat_num = row + i %}
+                                {% if seat_num <= total_seats %} <div class="flex-fill">
+                                    <input type="checkbox" class="btn-check seat-checkbox" name="seat_number"
+                                        id="seat{{ seat_num }}" value="{{ seat_num }}" {% if seat_num in booked_seats or
+                                        not travel_date_str %}disabled{% endif %}>
+                                    <label
+                                        class="btn w-100 btn-sm rounded-3 seat-label {% if seat_num in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
+                                        for="seat{{ seat_num }}" data-seat="{{ seat_num }}"
+                                        style="font-size: 13px; padding: 8px 0;">
+                                        {{ seat_num }}
+                                    </label>
+                            </div>
+                            {% endif %}
                             {% endfor %}
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg" {% if not travel_date_str %}disabled{% endif %}>
-                                Confirm Booking
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="text-center mt-3">
-                        <a href="{{ url_for('user.home') }}" class="text-decoration-none">&larr; Back to Home</a>
-                    </div>
                 </div>
+
+                <div class="col-1 text-center text-muted align-self-center small px-0"
+                    style="font-size: 11px; opacity: 0.4;">|</div>
+
+                <div class="col-4 d-flex gap-2">
+                    {% set seat_num = row + 3 %}
+                    {% if seat_num <= total_seats %} <div class="flex-fill">
+                        <input type="checkbox" class="btn-check seat-checkbox" name="seat_number"
+                            id="seat{{ seat_num }}" value="{{ seat_num }}" {% if seat_num in booked_seats or not
+                            travel_date_str %}disabled{% endif %}>
+                        <label
+                            class="btn w-100 btn-sm rounded-3 seat-label {% if seat_num in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
+                            for="seat{{ seat_num }}" data-seat="{{ seat_num }}"
+                            style="font-size: 13px; padding: 8px 0;">
+                            {{ seat_num }}
+                        </label>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        {% for row in range(0, total_seats, 4) %}
+        <div class="row g-2 justify-content-between mb-2">
+            <div class="col-5 d-flex gap-2">
+                {% for i in range(1, 3) %}
+                {% set seat_num = row + i %}
+                {% if seat_num <= total_seats %} <div class="flex-fill">
+                    <input type="checkbox" class="btn-check seat-checkbox" name="seat_number" id="seat{{ seat_num }}"
+                        value="{{ seat_num }}" {% if seat_num in booked_seats or not travel_date_str %}disabled{% endif
+                        %}>
+                    <label
+                        class="btn w-100 btn-sm rounded-3 seat-label {% if seat_num in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
+                        for="seat{{ seat_num }}" data-seat="{{ seat_num }}" style="font-size: 13px; padding: 8px 0;">
+                        {{ seat_num }}
+                    </label>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="col-2 text-center text-muted align-self-center small" style="font-size: 11px; opacity: 0.4;">| |
+        </div>
+
+        <div class="col-5 d-flex gap-2">
+            {% for i in range(3, 5) %}
+            {% set seat_num = row + i %}
+            {% if seat_num <= total_seats %} <div class="flex-fill">
+                <input type="checkbox" class="btn-check seat-checkbox" name="seat_number" id="seat{{ seat_num }}"
+                    value="{{ seat_num }}" {% if seat_num in booked_seats or not travel_date_str %}disabled{% endif %}>
+                <label
+                    class="btn w-100 btn-sm rounded-3 seat-label {% if seat_num in booked_seats %}btn-secondary text-decoration-line-through{% else %}btn-outline-primary{% endif %}"
+                    for="seat{{ seat_num }}" data-seat="{{ seat_num }}" style="font-size: 13px; padding: 8px 0;">
+                    {{ seat_num }}
+                </label>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endif %}
+</div>
+</div>
+
+<!-- Cancel Seat & Add Seat Buttons -->
+<div class="row g-2 mb-3">
+    <div class="col-6">
+        <button type="button" id="cancelSeatBtn" class="btn btn-outline-danger w-100 fw-bold py-2 rounded-3">
+            <i class="fa-solid fa-rotate-left me-1"></i> Cancel {% if is_sleeper %}Bed{% else %}Seat{% endif %}
+        </button>
+    </div>
+    <div class="col-6">
+        <button type="button" id="addSeatBtn" class="btn btn-outline-primary w-100 fw-bold py-2 rounded-3">
+            <i class="fa-solid fa-plus me-1"></i> Add {% if is_sleeper %}Bed{% else %}Seat{% endif %}
+        </button>
+    </div>
+</div>
+
+<div class="d-grid">
+    <button type="submit" id="confirmBookingBtn" class="btn btn-primary btn-lg rounded-3 fw-bold" {% if not
+        travel_date_str %}disabled{% endif %}>
+        Confirm Booking
+    </button>
+</div>
+</form>
+
+<div class="text-center mt-3">
+    <a href="{{ url_for('user.home') }}" class="text-decoration-none small">&larr; Back to Home</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 1. Bootstrap Confirmation Modal (Lock screen with static backdrop) -->
+<div class="modal fade" id="seatConfirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="seatConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow border-0">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title fw-bold" id="seatConfirmModalLabel">
+                    <i class="fa-solid fa-circle-check me-2"></i>Confirm {% if is_sleeper %}Bed{% else %}Seat{% endif %}
+                    Selection
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p id="modalConfirmMessage" class="fs-6 text-dark fw-semibold mb-0"></p>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-4 fw-bold"
+                    data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="modalConfirmYesBtn" class="btn btn-primary rounded-3 px-4 fw-bold">OK</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- 2. Bootstrap Alert Modal (Lock screen with static backdrop) -->
+<div class="modal fade" id="seatAlertModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="seatAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow border-0">
+            <div class="modal-header bg-warning text-dark rounded-top-4">
+                <h5 class="modal-title fw-bold" id="seatAlertModalLabel">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Notice
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p id="modalAlertMessage" class="fs-6 text-dark fw-semibold mb-0"></p>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 justify-content-center">
+                <button type="button" class="btn btn-warning rounded-3 px-5 fw-bold" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const travelDateInput = document.getElementById('travel_date');
+
+        const isSleeper = document.body.innerText.toLowerCase().includes('berth') || document.body.innerText.toLowerCase().includes('sleeper');
+        const unitName = isSleeper ? 'bed' : 'seat';
+        const unitNameCapital = isSleeper ? 'Bed' : 'Seat';
+
+        if (travelDateInput) {
+            travelDateInput.setAttribute('min', today);
+        }
+
+        const checkboxes = document.querySelectorAll('.seat-checkbox');
+        const addSeatBtn = document.getElementById('addSeatBtn');
+        const cancelSeatBtn = document.getElementById('cancelSeatBtn');
+        const confirmBtn = document.getElementById('confirmBookingBtn');
+        const bookingForm = document.getElementById('bookingForm');
+        const maxSeats = 5;
+
+        let lockedSeats = [];
+
+        const confirmModalEl = document.getElementById('seatConfirmModal');
+        const seatConfirmModal = new bootstrap.Modal(confirmModalEl);
+        const modalConfirmMessage = document.getElementById('modalConfirmMessage');
+        const modalConfirmYesBtn = document.getElementById('modalConfirmYesBtn');
+
+        const alertModalEl = document.getElementById('seatAlertModal');
+        const seatAlertModal = new bootstrap.Modal(alertModalEl);
+        const modalAlertMessage = document.getElementById('modalAlertMessage');
+
+        let pendingCheckedSeats = [];
+        let isConfirmedAndSubmitting = false;
+
+        function showBootstrapAlert(message) {
+            modalAlertMessage.textContent = message;
+            seatAlertModal.show();
+        }
+
+        function updateConfirmButton() {
+            const currentChecked = Array.from(checkboxes).filter(cb => cb.checked && !lockedSeats.includes(cb.value));
+            const totalSelected = currentChecked.length + lockedSeats.length;
+
+            if (confirmBtn && travelDateInput && travelDateInput.value) {
+                if (totalSelected > 0) {
+                    confirmBtn.removeAttribute('disabled');
+                } else {
+                    confirmBtn.setAttribute('disabled', 'disabled');
+                }
+            }
+        }
+
+        if (addSeatBtn) {
+            addSeatBtn.addEventListener('click', function () {
+                pendingCheckedSeats = Array.from(checkboxes).filter(cb => cb.checked && !lockedSeats.includes(cb.value));
+
+                if (pendingCheckedSeats.length === 0) {
+                    showBootstrapAlert(`Please select a ${unitName} before clicking Add ${unitNameCapital}!`);
+                    return;
+                }
+
+                const totalCount = lockedSeats.length + pendingCheckedSeats.length;
+                if (totalCount > maxSeats) {
+                    showBootstrapAlert(`You can only select up to 5 ${unitName}s!`);
+                    return;
+                }
+
+                const seatNumStr = pendingCheckedSeats.map(cb => cb.value).join(', ');
+                modalConfirmMessage.innerHTML = `Do you want to lock ${unitName}(s) <span class="text-primary fw-bold">${seatNumStr}</span> and continue?`;
+
+                isConfirmedAndSubmitting = false;
+                seatConfirmModal.show();
+            });
+        }
+
+        modalConfirmYesBtn.onclick = function () {
+            pendingCheckedSeats.forEach(cb => {
+                if (!lockedSeats.includes(cb.value)) {
+                    lockedSeats.push(cb.value);
+                }
+                cb.setAttribute('data-locked', 'true');
+                cb.style.pointerEvents = 'none';
+            });
+
+            seatConfirmModal.hide();
+            updateConfirmButton();
+
+            if (isConfirmedAndSubmitting && bookingForm) {
+                submitBookingForm();
+            }
+        };
+
+        function submitBookingForm() {
+            document.querySelectorAll('input.dynamic-seat-input').forEach(el => el.remove());
+
+            const uniqueSeats = [...new Set(lockedSeats)];
+
+            uniqueSeats.forEach(seatVal => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'seat_numbers';
+                hiddenInput.value = seatVal;
+                hiddenInput.className = 'dynamic-seat-input';
+                bookingForm.appendChild(hiddenInput);
+            });
+
+            bookingForm.submit();
+        }
+
+        if (cancelSeatBtn) {
+            cancelSeatBtn.addEventListener('click', function () {
+                const currentChecked = Array.from(checkboxes).filter(cb => cb.checked && !lockedSeats.includes(cb.value));
+
+                if (currentChecked.length > 0) {
+                    currentChecked.forEach(cb => cb.checked = false);
+                } else if (lockedSeats.length > 0) {
+                    const lastLockedVal = lockedSeats.pop();
+                    checkboxes.forEach(cb => {
+                        if (cb.value === lastLockedVal) {
+                            cb.checked = false;
+                            cb.removeAttribute('data-locked');
+                            cb.style.pointerEvents = 'auto';
+                        }
+                    });
+                } else {
+                    showBootstrapAlert(`No ${unitName}s to cancel!`);
+                }
+                updateConfirmButton();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function () {
+                if (this.hasAttribute('data-locked')) {
+                    this.checked = true;
+                    return;
+                }
+
+                if (this.checked) {
+                    checkboxes.forEach(otherCb => {
+                        if (otherCb !== this && !otherCb.hasAttribute('data-locked')) {
+                            otherCb.checked = false;
+                        }
+                    });
+                }
+
+                const currentChecked = Array.from(checkboxes).filter(c => c.checked && !c.hasAttribute('data-locked'));
+                const totalSelected = lockedSeats.length + currentChecked.length;
+
+                if (totalSelected > maxSeats) {
+                    this.checked = false;
+                    showBootstrapAlert(`You can only select up to 5 ${unitName}s!`);
+                }
+                updateConfirmButton();
+            });
+        });
+
+        if (bookingForm) {
+            bookingForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const currentChecked = Array.from(checkboxes).filter(cb => cb.checked);
+
+                let allSelectedSeats = [...lockedSeats];
+                currentChecked.forEach(cb => {
+                    if (!allSelectedSeats.includes(cb.value)) {
+                        allSelectedSeats.push(cb.value);
+                    }
+                });
+
+                allSelectedSeats = [...new Set(allSelectedSeats)];
+
+                if (allSelectedSeats.length === 0) {
+                    showBootstrapAlert(`Please select at least one ${unitName} before confirming!`);
+                    return;
+                }
+
+                if (allSelectedSeats.length > maxSeats) {
+                    showBootstrapAlert(`You can only select up to 5 ${unitName}s!`);
+                    return;
+                }
+
+                lockedSeats = allSelectedSeats;
+
+                const seatNumStr = lockedSeats.join(', ');
+                modalConfirmMessage.innerHTML = `Do you want to confirm booking for ${unitName}(s) <span class="text-primary fw-bold">${seatNumStr}</span>?`;
+
+                isConfirmedAndSubmitting = true;
+                seatConfirmModal.show();
+            });
+        }
+
+        updateConfirmButton();
+    });
+</script>
 {% endblock %}

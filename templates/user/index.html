@@ -41,17 +41,17 @@
                         <i class="fa-solid fa-location-dot text-danger me-1"></i> From
                     </label>
                     <select name="origin" id="originSelect" class="form-select border-light-subtle" required>
-                        <option value="" disabled selected>-- Select Origin --</option>
-                        {% for route in routes %}
-                        <option value="{{ route.origin }}" {% if request.args.get('origin')==route.origin %}selected{%
-                            endif %}>
-                            {{ route.origin }}
+                        <option value="" disabled {% if not request.args.get('origin') %}selected{% endif %}>-- Select
+                            Origin --</option>
+                        {% for org in origins %}
+                        <option value="{{ org }}" {% if request.args.get('origin')==org %}selected{% endif %}>
+                            {{ org }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- 2. Swap Button (ប៊ូតុងដូរទិសដៅ) -->
+                <!-- 2. Swap Button -->
                 <div class="col-auto text-center">
                     <button type="button" id="swapBtn" class="btn btn-outline-secondary" title="Swap From and To">
                         <i class="fa-solid fa-right-left"></i>
@@ -64,11 +64,11 @@
                         <i class="fa-solid fa-location-crosshairs text-primary me-1"></i> To
                     </label>
                     <select name="destination" id="destinationSelect" class="form-select border-light-subtle" required>
-                        <option value="" disabled selected>-- Select Destination --</option>
-                        {% for route in routes %}
-                        <option value="{{ route.destination }}" {% if request.args.get('destination')==route.destination
-                            %}selected{% endif %}>
-                            {{ route.destination }}
+                        <option value="" disabled {% if not request.args.get('destination') %}selected{% endif %}>--
+                            Select Destination --</option>
+                        {% for dest in destinations %}
+                        <option value="{{ dest }}" {% if request.args.get('destination')==dest %}selected{% endif %}>
+                            {{ dest }}
                         </option>
                         {% endfor %}
                     </select>
@@ -79,11 +79,11 @@
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-regular fa-calendar-days me-1"></i> Departure Date
                     </label>
-                    <input type="date" name="date" class="form-control border-light-subtle"
-                        value="{{ request.args.get('date', '') }}" required>
+                    <input type="date" name="date" id="departureDate" class="form-control border-light-subtle"
+                        value="{{ request.args.get('date', current_date) }}" required>
                 </div>
 
-                <!-- 5. Return Date (រក្សាទំហំ Column ទុកជានិច្ច ប៉ុន្តែ Disabled បើជ្រើសរើស One-way) -->
+                <!-- 5. Return Date -->
                 <div class="col-md" id="returnDateCol">
                     <label class="form-label text-muted small fw-bold mb-1" id="returnLabel">
                         <i class="fa-regular fa-calendar-days me-1"></i> Return Date
@@ -109,7 +109,7 @@
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Available Buses</h5>
-                <span class="text-muted small">Showing results for your search</span>
+                <span class="text-muted small">Showing all available schedules</span>
             </div>
 
             {% if schedules %}
@@ -124,16 +124,27 @@
 
                     <div class="col-md-5">
                         <div class="d-flex align-items-center gap-2 mb-1">
+                            {% if schedule.bus.logo %}
+                            <img src="{{ schedule.bus.logo }}" alt="Logo"
+                                class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
+                                style="width: 45px; height: 26px;">
+                            {% else %}
+                            <i class="fa-solid fa-bus text-primary fs-6"></i>
+                            {% endif %}
+
                             <h6 class="fw-bold mb-0">{{ schedule.bus.name }}</h6>
+
                             <span
                                 class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8">
                                 {{ schedule.bus.type }}
                             </span>
                         </div>
                         <div class="d-flex align-items-center gap-2 text-dark fw-bold my-1">
-                            <span>{{ schedule.departure_time }}</span>
+                            <span>{{ schedule.departure_time.strftime('%I:%M %p') if schedule.departure_time else '-'
+                                }}</span>
                             <i class="fa-solid fa-arrow-right text-muted fs-7"></i>
-                            <span>{{ schedule.arrival_time }}</span>
+                            <span>{{ schedule.arrival_time.strftime('%I:%M %p') if schedule.arrival_time else '-'
+                                }}</span>
                         </div>
                         <p class="text-muted small mb-0">
                             <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.route.origin }} &rarr; {{
@@ -146,9 +157,19 @@
                             <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
                             <span class="text-muted small">/ person</span>
                         </div>
+                        <!-- ប៊ូតុង Select ដើម្បីផ្ញើ ID មកកាន់ Sidebar -->
+                        <a href="{{ url_for('user.home', selected_schedule_id=schedule.id) }}"
+                            class="btn btn-outline-primary fw-medium rounded-pill px-3 me-1 mb-1">
+                            Select
+                        </a>
+                        <!-- ប៊ូតុង Dynamic តាមប្រភេទឡាន Seater ឬ Sleeper -->
                         <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}"
-                            class="btn btn-outline-primary fw-medium rounded-pill px-4">
+                            class="btn btn-primary fw-medium rounded-pill px-3 mb-1">
+                            {% if schedule.bus.type and 'sleeper' in schedule.bus.type.lower() %}
+                            <i class="fa-solid fa-bed me-1"></i> View Bed
+                            {% else %}
                             <i class="fa-solid fa-chair me-1"></i> View Seats
+                            {% endif %}
                         </a>
                     </div>
                 </div>
@@ -157,7 +178,7 @@
             {% else %}
             <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted">
                 <i class="fa-solid fa-bus-simple fs-1 mb-2 text-secondary"></i>
-                <h6>No buses available for this route or date.</h6>
+                <h6>No buses available at the moment.</h6>
             </div>
             {% endif %}
         </div>
@@ -168,13 +189,16 @@
                 <h5 class="fw-bold mb-3">Your Booking</h5>
 
                 {% if selected_bus %}
-                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-                    <img src="{{ selected_bus.bus.image if (selected_bus.bus and selected_bus.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
-                        class="rounded-3 object-fit-cover" width="60" height="50" alt="Bus">
-                    <div>
-                        <h6 class="fw-bold mb-0">{{ selected_bus.bus.name }}</h6>
-                        <span class="badge bg-light text-dark border fs-8 mt-1">{{ selected_bus.bus.type }}</span>
-                    </div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    {% if selected_bus.bus and selected_bus.bus.logo %}
+                    <img src="{{ selected_bus.bus.logo }}" alt="Logo"
+                        class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
+                        style="width: 35px; height: 25px;">
+                    {% else %}
+                    <i class="fa-solid fa-bus text-primary fs-6"></i>
+                    {% endif %}
+
+                    <h6 class="fw-bold mb-0 text-dark">{{ selected_bus.bus.name }}</h6>
                 </div>
 
                 <div class="small text-muted mb-3">
@@ -185,7 +209,10 @@
                     </div>
                     <div class="d-flex justify-content-between mb-1">
                         <span>Departure Time:</span>
-                        <span class="fw-bold text-dark">{{ selected_bus.departure_time }}</span>
+                        <span class="fw-bold text-dark">
+                            {{ selected_bus.departure_time.strftime('%I:%M %p') if selected_bus.departure_time else '-'
+                            }}
+                        </span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Ticket Price:</span>
@@ -196,56 +223,136 @@
                 <hr>
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="fw-bold">Total Amount:</span>
+                    <span class="fw-bold text-dark">Total Amount:</span>
                     <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(selected_bus.price) }}</span>
                 </div>
 
+                <!-- ប៊ូតុង Dynamic ក្នុង Sidebar តាមប្រភេទឡាន -->
                 <a href="{{ url_for('booking.book_ticket', schedule_id=selected_bus.id) }}"
                     class="btn btn-primary w-100 fw-bold py-2 rounded-3">
+                    {% if selected_bus.bus.type and 'sleeper' in selected_bus.bus.type.lower() %}
+                    Select Beds & Book <i class="fa-solid fa-arrow-right ms-1"></i>
+                    {% else %}
                     Select Seats & Book <i class="fa-solid fa-arrow-right ms-1"></i>
+                    {% endif %}
                 </a>
                 {% else %}
                 <div class="text-center py-5 text-muted">
                     <i class="fa-solid fa-ticket-simple fs-1 text-light-subtle mb-2"></i>
                     <p class="fw-medium mb-1">Not booking yet</p>
-                    <p class="small text-secondary mb-0">Please click <b>"View Seats"</b> on any available bus to
+                    <p class="small text-secondary mb-0">Please click <b>"Select"</b> on any available bus to
                         proceed.</p>
                 </div>
                 {% endif %}
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-    // បើក ឬ បិទ Return Date Input ដោយរក្សាទំហំ Column ឱ្យស្មើគ្នា
-    function toggleReturnDate() {
-        const isRoundTrip = document.getElementById('roundtrip').checked;
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+
+        const departureInput = document.querySelector('input[name="date"]');
         const returnInput = document.getElementById('returnDateInput');
-        const returnLabel = document.getElementById('returnLabel');
 
-        if (isRoundTrip) {
-            returnInput.removeAttribute('disabled');
-            returnInput.setAttribute('required', 'required');
-            returnInput.classList.remove('bg-light');
-            returnLabel.style.opacity = '1';
-        } else {
-            returnInput.setAttribute('disabled', 'disabled');
-            returnInput.removeAttribute('required');
-            returnInput.value = '';
-            returnInput.classList.add('bg-light');
-            returnLabel.style.opacity = '0.4';
+        if (departureInput) {
+            departureInput.setAttribute('min', todayStr);
+            if (!departureInput.value) {
+                departureInput.value = todayStr;
+            }
         }
-    }
 
-    // ប៊ូតុង Swap Toggled
-    document.getElementById('swapBtn').addEventListener('click', function () {
+        function getNextDay(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + 1);
+            return date.toISOString().split('T')[0];
+        }
+
+        if (returnInput && departureInput) {
+            let nextDayStr = getNextDay(departureInput.value);
+            returnInput.setAttribute('min', nextDayStr);
+
+            departureInput.addEventListener('change', function () {
+                let newMinReturn = getNextDay(departureInput.value);
+                returnInput.setAttribute('min', newMinReturn);
+                if (!returnInput.value || returnInput.value < newMinReturn) {
+                    returnInput.value = newMinReturn;
+                }
+            });
+        }
+
+        window.toggleReturnDate = function () {
+            const isRoundTrip = document.getElementById('roundtrip');
+            const returnLabel = document.getElementById('returnLabel');
+
+            if (!isRoundTrip || !returnInput) return;
+
+            if (isRoundTrip.checked) {
+                returnInput.removeAttribute('disabled');
+                returnInput.setAttribute('required', 'required');
+                returnInput.classList.remove('bg-light');
+                if (returnLabel) returnLabel.style.opacity = '1';
+
+                if (departureInput && !returnInput.value) {
+                    returnInput.value = getNextDay(departureInput.value);
+                }
+            } else {
+                returnInput.setAttribute('disabled', 'disabled');
+                returnInput.removeAttribute('required');
+                returnInput.value = '';
+                returnInput.classList.add('bg-light');
+                if (returnLabel) returnLabel.style.opacity = '0.4';
+            }
+        }
+
+        window.filterDestinations = function () {
+            const originVal = document.getElementById('originSelect').value;
+            const destSelect = document.getElementById('destinationSelect');
+
+            if (!destSelect) return;
+
+            for (let option of destSelect.options) {
+                if (option.value === originVal && option.value !== "") {
+                    option.style.display = 'none';
+                } else {
+                    option.style.display = 'block';
+                }
+            }
+
+            if (destSelect.value === originVal) {
+                destSelect.value = "";
+            }
+        }
+
         const originSelect = document.getElementById('originSelect');
-        const destinationSelect = document.getElementById('destinationSelect');
+        if (originSelect) {
+            originSelect.addEventListener('change', filterDestinations);
+        }
 
-        const tempValue = originSelect.value;
-        originSelect.value = destinationSelect.value;
-        destinationSelect.value = tempValue;
+        filterDestinations();
+
+        const swapBtn = document.getElementById('swapBtn');
+        if (swapBtn) {
+            swapBtn.addEventListener('click', function () {
+                const destinationSelect = document.getElementById('destinationSelect');
+
+                if (originSelect && destinationSelect) {
+                    const tempValue = originSelect.value;
+                    originSelect.value = destinationSelect.value;
+                    destinationSelect.value = tempValue;
+
+                    filterDestinations();
+
+                    const form = originSelect.closest('form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            });
+        }
     });
 </script>
 

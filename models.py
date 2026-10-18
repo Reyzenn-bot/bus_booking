@@ -32,6 +32,7 @@ class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     origin = db.Column(db.String(50), nullable=False)
     destination = db.Column(db.String(50), nullable=False)
+    via = db.Column(db.String(50), nullable=True)
     distance = db.Column(db.Integer, nullable=True)  # Distance between origin and destination
     schedules = db.relationship('Schedule', backref='route', lazy=True)  # Relationship to Schedule
 
@@ -57,10 +58,15 @@ class Booking(db.Model):
     seat_number = db.Column(db.Integer, nullable=False)  # Seat number booked
     passenger_count = db.Column(db.Integer, nullable=False)  # Number of passengers
     ticket_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total ticket price
-    service_price = db.Column(db.Numeric(10, 2), nullable=False)  # Service price
+    service_fee = db.Column(db.Numeric(10, 2), nullable=False)  # Service price
     total_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total price (ticket + service)
     booking_status = db.Column(db.String(50), nullable=False, default='confirmed')  # e.g., 'pending', 'confirmed', 'cancelled'
     created_at = db.Column(db.DateTime, default=datetime.utcnow) # Booking creation timestamp
     trip_type = db.Column(db.String(20), nullable=False, default='oneway')  # 'oneway' ឬ 'roundtrip'
     return_date = db.Column(db.Date, nullable=True)  # ថ្ងៃត្រឡប់មកវិញ (បើជា Round-trip)
     return_schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=True)  # កាលវិភាគឡានត្រឡប់មកវិញ (បើមាន)
+    passenger_name = db.Column(db.String(50), nullable=True)
+    age = db.Column(db.Integer, nullable=True)
+    gender = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(255), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)

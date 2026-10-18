@@ -1,0 +1,255 @@
+{% extends "layout/base_admin.html" %}
+
+{% block title %}Manage Bookings - CamBusBook Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Bookings Management</h3>
+            <p class="text-muted small mb-0">View and manage all customer ticket bookings.</p>
+        </div>
+    </div>
+
+    <!-- Bookings Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase fs-7 text-secondary">
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Passenger</th>
+                            <th>Route</th>
+                            <th>Bus Company</th>
+                            <th>Travel Date</th>
+                            <th>Trip Type</th>
+                            <th>Seat</th>
+                            <th>Total ($)</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if bookings %}
+                        {% for booking in bookings %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">#{{ loop.index }}</td>
+                            <td>
+                                <div class="fw-medium text-dark">{{ booking.passenger_name if booking.passenger_name
+                                    else (booking.user.name if booking.user else 'Unknown') }}</div>
+                                <div class="text-muted small">{{ booking.phone if booking.phone else (booking.user.phone
+                                    if booking.user else '') }}</div>
+                            </td>
+                            <td>
+                                {% if booking.schedule and booking.schedule.route %}
+                                <div class="fw-medium text-dark">
+                                    <i class="fa-solid fa-route text-primary me-1"></i>
+                                    {{ booking.schedule.route.origin }} &rarr; {{ booking.schedule.route.destination }}
+                                </div>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if booking.schedule and booking.schedule.bus %}
+                                <span class="badge bg-light text-dark border px-2 py-1">
+                                    <i class="fa-solid fa-bus text-secondary me-1"></i>
+                                    {{ booking.schedule.bus.name }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ booking.travel_date }}</div>
+                                {% if booking.trip_type == 'roundtrip' and booking.return_date %}
+                                <div class="text-muted small">Return: {{ booking.return_date }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if booking.trip_type == 'roundtrip' %}
+                                <span class="badge bg-info-subtle text-info border border-info-subtle">Round-trip</span>
+                                {% else %}
+                                <span
+                                    class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">One-way</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                    Seat {{ booking.seat_number }}
+                                </span>
+                            </td>
+                            <td class="fw-bold text-success">${{ "%.2f"|format(booking.total_price) }}</td>
+                            <td>
+                                {% if booking.booking_status.lower() == 'confirmed' %}
+                                <span
+                                    class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Confirmed</span>
+                                {% elif booking.booking_status.lower() == 'pending' %}
+                                <span
+                                    class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Pending</span>
+                                {% elif booking.booking_status.lower() == 'rejected' %}
+                                <span
+                                    class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Rejected</span>
+                                {% else %}
+                                <span
+                                    class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">{{
+                                    booking.booking_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light border-0" type="button"
+                                        data-bs-toggle="dropdown">
+                                        <i class="fa-solid fa-ellipsis-vertical text-muted"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        <!-- 1. View Details -->
+                                        <li>
+                                            <button class="dropdown-item" data-bs-toggle="modal"
+                                                data-bs-target="#viewModal{{ booking.id }}">
+                                                <i class="fa-solid fa-eye me-2 text-primary"></i> View Details
+                                            </button>
+                                        </li>
+
+                                        <!-- 2. Reject Booking Button -->
+                                        {% if booking.booking_status.lower() != 'rejected' and
+                                        booking.booking_status.lower() != 'cancelled' %}
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <form action="{{ url_for('admin.reject_booking', booking_id=booking.id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Are you sure you want to reject booking #{{ booking.id }}?');">
+                                                <button type="submit" class="dropdown-item text-warning">
+                                                    <i class="fa-solid fa-ban me-2"></i> Reject Booking
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+
+                                        <!-- 3. Delete Booking Button -->
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <form action="{{ url_for('admin.delete_booking', booking_id=booking.id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Are you sure you want to completely delete booking #{{ booking.id }}?');">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="fa-solid fa-trash me-2"></i> Delete Booking
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- View Details Modal Popup -->
+                                <div class="modal fade text-start" id="viewModal{{ booking.id }}" tabindex="-1"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow rounded-4">
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="modal-title fw-bold text-dark">
+                                                    <i class="fa-solid fa-ticket text-primary me-2"></i>Booking Details
+                                                    #{{ booking.id }}
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body py-3">
+                                                <!-- Passenger Info -->
+                                                <div class="p-3 bg-light rounded-3 mb-3">
+                                                    <h6 class="fw-bold text-secondary mb-2 fs-7 text-uppercase"><i
+                                                            class="fa-solid fa-user me-1"></i> Passenger Information
+                                                    </h6>
+                                                    <div class="row g-2 small">
+                                                        <div class="col-6"><strong>Name:</strong> {{
+                                                            booking.passenger_name if booking.passenger_name else 'N/A'
+                                                            }}</div>
+                                                        <div class="col-6"><strong>Phone:</strong> {{ booking.phone if
+                                                            booking.phone else 'N/A' }}</div>
+                                                        <div class="col-6"><strong>Age:</strong> {{ booking.age if
+                                                            booking.age else 'N/A' }}</div>
+                                                        <div class="col-6"><strong>Gender:</strong> {{ booking.gender if
+                                                            booking.gender else 'N/A' }}</div>
+                                                        <div class="col-12"><strong>Email:</strong> {{ booking.email if
+                                                            booking.email else 'N/A' }}</div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Trip & Bus Info -->
+                                                <div class="p-3 bg-light rounded-3 mb-3">
+                                                    <h6 class="fw-bold text-secondary mb-2 fs-7 text-uppercase"><i
+                                                            class="fa-solid fa-bus me-1"></i> Trip Details</h6>
+                                                    <div class="row g-2 small">
+                                                        <div class="col-12"><strong>Route:</strong> {{
+                                                            booking.schedule.route.origin }} &rarr; {{
+                                                            booking.schedule.route.destination }}</div>
+                                                        <div class="col-6"><strong>Bus Company:</strong> {{
+                                                            booking.schedule.bus.name }}</div>
+                                                        <div class="col-6"><strong>Bus Type:</strong> {{
+                                                            booking.schedule.bus.type }}</div>
+                                                        <div class="col-6"><strong>Departure:</strong> {{
+                                                            booking.schedule.departure_time }}</div>
+                                                        <div class="col-6"><strong>Arrival:</strong> {{
+                                                            booking.schedule.arrival_time }}</div>
+                                                        <div class="col-6"><strong>Travel Date:</strong> {{
+                                                            booking.travel_date }}</div>
+                                                        <div class="col-6"><strong>Trip Type:</strong> {{
+                                                            booking.trip_type | title }}</div>
+                                                        {% if booking.return_date %}
+                                                        <div class="col-12"><strong>Return Date:</strong> {{
+                                                            booking.return_date }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Payment Info -->
+                                                <div class="p-3 bg-light rounded-3">
+                                                    <h6 class="fw-bold text-secondary mb-2 fs-7 text-uppercase"><i
+                                                            class="fa-solid fa-receipt me-1"></i> Payment Breakdown</h6>
+                                                    <div class="row g-2 small">
+                                                        <div class="col-6"><strong>Seat Number:</strong> Seat {{
+                                                            booking.seat_number }}</div>
+                                                        <div class="col-6"><strong>Ticket Price:</strong> ${{
+                                                            "%.2f"|format(booking.ticket_price) }}</div>
+                                                        <div class="col-6"><strong>Service Fee:</strong> ${{
+                                                            "%.2f"|format(booking.service_fee) }}</div>
+                                                        <div class="col-6 text-success fw-bold"><strong>Total
+                                                                Price:</strong> ${{ "%.2f"|format(booking.total_price)
+                                                            }}</div>
+                                                        <div class="col-12"><strong>Status:</strong> <span
+                                                                class="badge bg-success-subtle text-success border">{{
+                                                                booking.booking_status | title }}</span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-top-0 pt-0">
+                                                <button type="button" class="btn btn-secondary btn-sm px-3 rounded-3"
+                                                    data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Modal -->
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-ticket fs-1 text-light-subtle mb-2"></i>
+                                <p class="mb-0 fw-medium">No bookings found in the system yet.</p>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,21 +1,23 @@
 {% extends "layout/base_user.html" %}
 
-{% block title %}Search Results - BusBookCambo{% endblock %}
+{% block title %}Search Results - CamBusBook{% endblock %}
 
 {% block content %}
 <div class="container my-4">
 
     <!-- Search Form / Filter Section -->
     <div class="card p-4 shadow-sm border-0 rounded-4 mb-4 bg-white">
-        
+
         <!-- Trip Type Selection (One-way / Round-trip) -->
         <div class="mb-3 d-flex gap-4">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="trip_type" id="oneway" value="oneway" checked onchange="toggleReturnDate()">
+                <input class="form-check-input" type="radio" name="trip_type" id="oneway" value="oneway" checked
+                    onchange="toggleReturnDate()">
                 <label class="form-check-label fw-medium text-dark" for="oneway">One-way</label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="trip_type" id="roundtrip" value="roundtrip" onchange="toggleReturnDate()">
+                <input class="form-check-input" type="radio" name="trip_type" id="roundtrip" value="roundtrip"
+                    onchange="toggleReturnDate()">
                 <label class="form-check-label fw-medium text-dark" for="roundtrip">Round-trip</label>
             </div>
         </div>
@@ -28,17 +30,18 @@
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-solid fa-location-dot text-danger me-1"></i> From
                     </label>
-                    <select name="origin" id="originSelect" class="form-select border-light-subtle">
-                        <option value="" disabled {% if not origin %}selected{% endif %}>-- All Origins --</option>
-                        {% for r in routes %}
-                        <option value="{{ r.origin }}" {% if origin == r.origin %}selected{% endif %}>
-                            {{ r.origin }}
+                    <select name="origin" id="originSelect" class="form-select border-light-subtle"
+                        onchange="filterDestinations()">
+                        <option value="" disabled {% if not origin %}selected{% endif %}>-- Select Origin --</option>
+                        {% for org in origins %}
+                        <option value="{{ org }}" {% if origin==org %}selected{% endif %}>
+                            {{ org }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- 2. Swap Button (ប៊ូតុងប្តូរទិសដៅ) -->
+                <!-- 2. Swap Button -->
                 <div class="col-auto text-center">
                     <button type="button" id="swapBtn" class="btn btn-outline-secondary" title="Swap From and To">
                         <i class="fa-solid fa-right-left"></i>
@@ -51,10 +54,11 @@
                         <i class="fa-solid fa-location-crosshairs text-primary me-1"></i> To
                     </label>
                     <select name="destination" id="destinationSelect" class="form-select border-light-subtle">
-                        <option value="" disabled {% if not destination %}selected{% endif %}>-- All Destinations --</option>
-                        {% for r in routes %}
-                        <option value="{{ r.destination }}" {% if destination == r.destination %}selected{% endif %}>
-                            {{ r.destination }}
+                        <option value="" disabled {% if not destination %}selected{% endif %}>-- Select Destination --
+                        </option>
+                        {% for dest in destinations %}
+                        <option value="{{ dest }}" {% if destination==dest %}selected{% endif %}>
+                            {{ dest }}
                         </option>
                         {% endfor %}
                     </select>
@@ -65,15 +69,18 @@
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-regular fa-calendar-days me-1"></i> Departure Date
                     </label>
-                    <input type="date" name="date" class="form-control border-light-subtle" value="{{ date or '' }}">
+                    <input type="date" name="date" id="departureDate" class="form-control border-light-subtle"
+                        value="{{ request.args.get('date', current_date) }}" required>
                 </div>
 
-                <!-- 5. Return Date (រក្សាទំហំ Column ទុក ប៉ុន្តែ Disabled បើជ្រើសរើស One-way) -->
+                <!-- 5. Return Date -->
                 <div class="col-md" id="returnDateCol">
-                    <label class="form-label text-muted small fw-bold mb-1" id="returnLabel" style="opacity: 0.4;">
+                    <label class="form-label text-muted small fw-bold mb-1" id="returnLabel">
                         <i class="fa-regular fa-calendar-days me-1"></i> Return Date
                     </label>
-                    <input type="date" name="return_date" id="returnDateInput" class="form-control border-light-subtle bg-light" value="{{ request.args.get('return_date', '') }}" disabled>
+                    <input type="date" name="return_date" id="returnDateInput"
+                        class="form-control border-light-subtle bg-light"
+                        value="{{ request.args.get('return_date', '') }}" disabled>
                 </div>
 
                 <!-- 6. Search / Filter Button -->
@@ -87,94 +94,207 @@
         </form>
     </div>
 
-    <!-- Search Results List -->
+    <!-- Condition: ពិនិត្យមើលថា User បានជ្រើសរើស Origin និង Destination ហើយឬនៅ -->
+    {% if origin and destination %}
     <h5 class="fw-bold mb-1">Search Results</h5>
     <p class="text-muted small mb-3">
-        Found {{ schedules|length if schedules else 0 }} bus(es) for 
-        <strong>{{ origin or 'All Origins' }}</strong> to <strong>{{ destination or 'All Destinations' }}</strong>
+        Found {{ schedules|length if schedules else 0 }} bus(es) for
+        <strong>{{ origin }}</strong> to <strong>{{ destination }}</strong>
     </p>
 
     {% if schedules %}
-        <div class="row g-3">
-            {% for schedule in schedules %}
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4 p-3">
-                    <div class="row align-items-center g-3">
-                        <div class="col-md-3">
-                            <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
-                                class="img-fluid rounded-3 object-fit-cover" alt="Bus Image" style="height: 100px; width: 100%;">
-                        </div>
+    <div class="row g-3">
+        {% for schedule in schedules %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-3">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-3">
+                        <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
+                            class="rounded-3 w-100 shadow-sm" alt="Bus Image" style="height: 110px; object-fit: cover;">
+                    </div>
 
-                        <div class="col-md-5">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <h6 class="fw-bold mb-0">{{ schedule.bus.name }}</h6>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8">
-                                    {{ schedule.bus.type }}
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 text-dark fw-bold my-1">
-                                <span>{{ schedule.departure_time }}</span>
-                                <i class="fa-solid fa-arrow-right text-muted fs-7"></i>
-                                <span>{{ schedule.arrival_time }}</span>
-                            </div>
-                            <p class="text-muted small mb-0">
-                                <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.route.origin }} &rarr; {{ schedule.route.destination }}
-                            </p>
-                        </div>
+                    <div class="col-md-5">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            {% if schedule.bus.logo %}
+                            <img src="{{ schedule.bus.logo }}" alt="Logo"
+                                class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
+                                style="width: 45px; height: 26px;">
+                            {% else %}
+                            <i class="fa-solid fa-bus text-primary fs-6"></i>
+                            {% endif %}
 
-                        <div class="col-md-4 text-md-end border-start-md">
-                            <div class="mb-2">
-                                <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
-                                <span class="text-muted small">/ person</span>
-                            </div>
-                            <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}" class="btn btn-outline-primary fw-medium rounded-pill px-4">
-                                <i class="fa-solid fa-chair me-1"></i> View Seats
-                            </a>
+                            <h6 class="fw-bold mb-0">{{ schedule.bus.name }}</h6>
+
+                            <span
+                                class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8">
+                                {{ schedule.bus.type }}
+                            </span>
                         </div>
+                        <div class="d-flex align-items-center gap-2 text-dark fw-bold my-1">
+                            <span>{{ schedule.departure_time.strftime('%I:%M %p') if schedule.departure_time else '-'
+                                }}</span>
+                            <i class="fa-solid fa-arrow-right text-muted fs-7"></i>
+                            <span>{{ schedule.arrival_time.strftime('%I:%M %p') if schedule.arrival_time else '-'
+                                }}</span>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.route.origin }} &rarr; {{
+                            schedule.route.destination }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-4 text-md-end border-start-md">
+                        <div class="mb-2">
+                            <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
+                            <span class="text-muted small">/ person</span>
+                        </div>
+                        <!-- ប៊ូតុង Dynamic តាមប្រភេទឡាន Seater ឬ Sleeper (គាំទ្រ Round-trip) -->
+                        <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id, trip_type=request.args.get('trip_type', 'oneway'), return_date=request.args.get('return_date', '')) }}"
+                            class="btn btn-primary fw-medium rounded-pill px-3 mb-1">
+                            {% if schedule.bus.type and 'sleeper' in schedule.bus.type.lower() %}
+                            <i class="fa-solid fa-bed me-1"></i> View Bed
+                            {% else %}
+                            <i class="fa-solid fa-chair me-1"></i> View Seats
+                            {% endif %}
+                        </a>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted my-4">
-            <i class="fa-solid fa-magnifying-glass-location fs-1 text-secondary mb-3"></i>
-            <h6>No buses match your filter criteria.</h6>
-            <p class="small text-secondary mb-0">Try selecting a different route or departure date.</p>
-        </div>
+    <!-- ករណីស្វែងរកហើយតែគ្មានឡាន -->
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted my-4">
+        <i class="fa-solid fa-magnifying-glass-location fs-1 text-secondary mb-3"></i>
+        <h6>No buses match your filter criteria.</h6>
+        <p class="small text-secondary mb-0">Try selecting a different route or departure date.</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- ករណី User មិនទាន់បានជ្រើសរើស Origin និង Destination -->
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted my-4">
+        <i class="fa-solid fa-bus text-primary fs-1 mb-3"></i>
+        <h6 class="fw-bold text-dark">Please select both Origin (From) and Destination (To)</h6>
+        <p class="small text-secondary mb-0">Choose your travel route above to search for available bus schedules.</p>
+    </div>
     {% endif %}
 
 </div>
 
 <!-- JavaScript Functions -->
 <script>
-// បើក ឬ បិទ Return Date Input ដោយរក្សាទំហំ Column ឱ្យស្មើគ្នា
-function toggleReturnDate() {
-    const isRoundTrip = document.getElementById('roundtrip').checked;
-    const returnInput = document.getElementById('returnDateInput');
-    const returnLabel = document.getElementById('returnLabel');
-    
-    if (isRoundTrip) {
-        returnInput.removeAttribute('disabled');
-        returnInput.classList.remove('bg-light');
-        returnLabel.style.opacity = '1';
-    } else {
-        returnInput.setAttribute('disabled', 'disabled');
-        returnInput.value = '';
-        returnInput.classList.add('bg-light');
-        returnLabel.style.opacity = '0.4';
-    }
-}
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. កំណត់កាលបរិច្ឆេទថ្ងៃនេះ (Current Date) សម្រាប់ Departure Date
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
 
-// ប៊ូតុង Swap Toggled
-document.getElementById('swapBtn').addEventListener('click', function() {
-    const originSelect = document.getElementById('originSelect');
-    const destinationSelect = document.getElementById('destinationSelect');
+        const departureInput = document.querySelector('input[name="date"]');
+        const returnInput = document.getElementById('returnDateInput');
 
-    const tempValue = originSelect.value;
-    originSelect.value = destinationSelect.value;
-    destinationSelect.value = tempValue;
-});
+        if (departureInput) {
+            departureInput.setAttribute('min', todayStr);
+            if (!departureInput.value) {
+                departureInput.value = todayStr;
+            }
+        }
+
+        // មុខងារសម្រាប់គណនាកាលបរិច្ឆេទបូកថែម ១ថ្ងៃ
+        function getNextDay(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + 1);
+            return date.toISOString().split('T')[0];
+        }
+
+        if (returnInput && departureInput) {
+            // កំណត់តម្លៃអប្បបរមា (min) របស់ Return Date ឱ្យនៅក្រោយ Departure Date ១ ថ្ងៃជានិច្ច
+            let nextDayStr = getNextDay(departureInput.value);
+            returnInput.setAttribute('min', nextDayStr);
+
+            // បើ User ប្ដូរ Departure Date នោះ Return Date នឹងបូកថែម ១ ថ្ងៃស្វ័យប្រវត្តិ
+            departureInput.addEventListener('change', function () {
+                let newMinReturn = getNextDay(departureInput.value);
+                returnInput.setAttribute('min', newMinReturn);
+                if (!returnInput.value || returnInput.value < newMinReturn) {
+                    returnInput.value = newMinReturn;
+                }
+            });
+        }
+
+        // 2. បើក ឬ បិទ Return Date Input តាម One-way / Round-trip
+        window.toggleReturnDate = function () {
+            const isRoundTrip = document.getElementById('roundtrip');
+            const returnLabel = document.getElementById('returnLabel');
+
+            if (!isRoundTrip || !returnInput) return;
+
+            if (isRoundTrip.checked) {
+                returnInput.removeAttribute('disabled');
+                returnInput.setAttribute('required', 'required');
+                returnInput.classList.remove('bg-light');
+                if (returnLabel) returnLabel.style.opacity = '1';
+
+                if (departureInput && !returnInput.value) {
+                    returnInput.value = getNextDay(departureInput.value);
+                }
+            } else {
+                returnInput.setAttribute('disabled', 'disabled');
+                returnInput.removeAttribute('required');
+                returnInput.value = '';
+                returnInput.classList.add('bg-light');
+                if (returnLabel) returnLabel.style.opacity = '0.4';
+            }
+        }
+
+        // 3. មុខងារត្រោះច្រោះឈ្មោះមិនឱ្យស្ទួនគ្នា (Origin & Destination)
+        window.filterDestinations = function () {
+            const originVal = document.getElementById('originSelect').value;
+            const destSelect = document.getElementById('destinationSelect');
+
+            if (!destSelect) return;
+
+            for (let option of destSelect.options) {
+                if (option.value === originVal && option.value !== "") {
+                    option.style.display = 'none';
+                } else {
+                    option.style.display = 'block';
+                }
+            }
+
+            if (destSelect.value === originVal) {
+                destSelect.value = "";
+            }
+        }
+
+        const originSelect = document.getElementById('originSelect');
+        if (originSelect) {
+            originSelect.addEventListener('change', filterDestinations);
+        }
+
+        filterDestinations();
+
+        // 4. ប៊ូតុង Swap
+        const swapBtn = document.getElementById('swapBtn');
+        if (swapBtn) {
+            swapBtn.addEventListener('click', function () {
+                const destinationSelect = document.getElementById('destinationSelect');
+
+                if (originSelect && destinationSelect) {
+                    const tempValue = originSelect.value;
+                    originSelect.value = destinationSelect.value;
+                    destinationSelect.value = tempValue;
+
+                    filterDestinations();
+
+                    const form = originSelect.closest('form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            });
+        }
+    });
 </script>
 
 {% endblock %}

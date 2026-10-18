@@ -1,0 +1,138 @@
+{% extends 'layout/base_user.html' %}
+
+{% block title %}Booking Summary - BusBookCambo{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-dark">Step 2: Review Booking Summary</h3>
+                <p class="text-muted">Please double-check your ticket and passenger details before proceeding to
+                    payment.</p>
+            </div>
+
+            <!-- Ticket Card -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div
+                    class="card-header bg-primary text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-ticket me-2"></i>BusBookCambo E-Ticket Summary</h5>
+                    <span class="badge bg-light text-primary fw-bold">Review Mode</span>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Bus & Route Info -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3"><i
+                                class="fa-solid fa-bus text-primary me-1"></i> Bus & Route Details</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <!-- Bus Company / Type -->
+                                <span class="text-muted small d-block">Bus Company / Type</span>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    {% if schedule.bus.logo %}
+                                    <img src="{{ schedule.bus.logo }}" alt="Logo"
+                                        class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
+                                        style="width: 50px; height: 30px;">
+                                    {% else %}
+                                    <i class="fa-solid fa-bus text-primary"></i>
+                                    {% endif %}
+                                    <strong class="text-dark fs-6">{{ schedule.bus.name }} ({{ schedule.bus.type
+                                        }})</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-muted small d-block">Route</span>
+                                <strong class="text-dark fs-6">{{ schedule.route.origin }} &rarr; {{
+                                    schedule.route.destination }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-muted small d-block">Travel Date & Time</span>
+                                <strong class="text-dark">{{ travel_date }} at {{
+                                    schedule.departure_time.strftime('%I:%M %p') }}</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-muted small d-block">Selected Seat(s)</span>
+                                <span
+                                    class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                    {% for seat in seat_numbers %}Seat {{ seat }}{% if not loop.last %}, {% endif %}{%
+                                    endfor %} ({{ seat_numbers|length }} seat(s))
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Passenger Info -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3"><i
+                                class="fa-solid fa-user text-primary me-1"></i> Passenger Details</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <span class="text-muted small d-block">Passenger Name</span>
+                                <strong class="text-dark">{{ passenger_name }}</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-muted small d-block">Age & Gender</span>
+                                <strong class="text-dark">{{ age }} yrs, {{ gender }}</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-muted small d-block">Phone Number</span>
+                                <strong class="text-dark">{{ phone }}</strong>
+                            </div>
+                            <div class="col-md-12">
+                                <span class="text-muted small d-block">Email Address</span>
+                                <strong class="text-dark">{{ email if email else 'N/A' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Breakdown -->
+                    <div>
+                        <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3"><i
+                                class="fa-solid fa-receipt text-primary me-1"></i> Payment Summary</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Ticket Price ({{ seat_numbers|length }} seat(s) x ${{
+                                "%.2f"|format(schedule.price) }})</span>
+                            <span class="fw-medium">${{ "%.2f"|format(subtotal) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                            <span class="text-muted">Service Fee</span>
+                            <span class="fw-medium">${{ "%.2f"|format(service_fee) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <span class="fw-bold text-dark fs-5">Total Price</span>
+                            <span class="fw-bold text-success fs-3">${{ "%.2f"|format(total_price) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Back to Edit
+                </a>
+
+                <!-- Form បញ្ជូនព័ត៌មានទៅកាន់ទំព័រ Payment -->
+                <form action="{{ url_for('booking.booking_payment') }}" method="POST">
+                    <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
+                    <input type="hidden" name="travel_date" value="{{ travel_date }}">
+                    {% for seat in seat_numbers %}
+                    <input type="hidden" name="seat_numbers" value="{{ seat }}">
+                    {% endfor %}
+                    <input type="hidden" name="passenger_name" value="{{ passenger_name }}">
+                    <input type="hidden" name="age" value="{{ age }}">
+                    <input type="hidden" name="gender" value="{{ gender }}">
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <input type="hidden" name="phone" value="{{ phone }}">
+                    <input type="hidden" name="total_price" value="{{ total_price }}">
+
+                    <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-bold shadow-sm">
+                        Proceed to Payment <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

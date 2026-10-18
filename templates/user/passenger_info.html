@@ -1,0 +1,114 @@
+{% extends 'layout/base_user.html' %}
+
+{% block title %}Passenger Information - BusBookCambo{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4 text-primary fw-bold">Passenger Information</h3>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' or category == 'danger' else 'success' }} alert-dismissible fade show rounded-3"
+                        role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <!-- Booking Summary Card -->
+                    <div class="bg-light p-3 rounded-4 mb-4 border">
+                        <h5 class="fw-bold text-dark mb-2"><i class="fa-solid fa-ticket me-2 text-primary"></i>Booking
+                            Summary</h5>
+                        <p class="mb-1 small"><strong>Bus:</strong> {{ schedule.bus.name }} ({{ schedule.bus.type }})
+                        </p>
+                        <p class="mb-1 small"><strong>Route:</strong> {{ schedule.route.origin }} &rarr; {{
+                            schedule.route.destination }}</p>
+                        <p class="mb-1 small">
+                            <strong>Time:</strong>
+                            {{ schedule.departure_time.strftime('%I:%M %p') if schedule.departure_time else ''
+                            }}
+                            &rarr;
+                            {{ schedule.arrival_time.strftime('%I:%M %p') if schedule.arrival_time else '' }}
+                        </p>
+                        <p class="mb-1 small"><strong>Travel Date:</strong> {{ travel_date }}</p>
+                        <p class="mb-1 small">
+                            <strong>Selected {% if 'sleeper' in schedule.bus.type.lower() %}Beds{% else %}Seats{% endif
+                                %}:</strong>
+                            <span class="badge bg-primary text-white">{{ selected_seats | join(', ') }}</span>
+                        </p>
+                        <p class="mb-0 small text-success fw-bold">
+                            <strong>Total Price:</strong> ${{ "%.2f"|format(schedule.price * selected_seats|length) }}
+                            ({{ selected_seats|length }} {% if 'sleeper' in schedule.bus.type.lower() %}bed(s){% else
+                            %}seat(s){% endif %})
+                        </p>
+                    </div>
+
+                    <!-- Passenger Form -->
+                    <form action="{{ url_for('booking.booking_summary') }}" method="POST">
+                        <!-- Passing hidden data to backend -->
+                        <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
+                        <input type="hidden" name="travel_date" value="{{ travel_date }}">
+                        {% for seat in selected_seats %}
+                        <input type="hidden" name="seat_numbers" value="{{ seat }}">
+                        {% endfor %}
+
+                        <div class="mb-3">
+                            <label for="passenger_name" class="form-label fw-bold small text-muted">Full Name</label>
+                            <input type="text" class="form-control rounded-3" id="passenger_name" name="passenger_name"
+                                placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label fw-bold small text-muted">Age</label>
+                                <input type="number" class="form-control rounded-3" id="age" name="age" min="1"
+                                    max="120" placeholder="Enter your age" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label fw-bold small text-muted">Gender</label>
+                                <select class="form-select rounded-3" id="gender" name="gender" required>
+                                    <option value="" selected disabled>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-bold small text-muted">Email Address</label>
+                            <input type="email" class="form-control rounded-3" id="email" name="email"
+                                placeholder="example@gmail.com" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="phone" class="form-label fw-bold small text-muted">Phone Number</label>
+                            <input type="tel" class="form-control rounded-3" id="phone" name="phone"
+                                placeholder="012 345 678" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">
+                                Proceed to Summary & Payment &rarr;
+                            </button>
+                            <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}"
+                                class="btn btn-outline-secondary rounded-3 fw-bold">
+                                &larr; Back to Seat Selection
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

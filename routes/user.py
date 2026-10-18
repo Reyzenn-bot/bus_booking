@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 from models import db, User, Bus, Route, Schedule, Booking
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
@@ -8,19 +9,31 @@ user_bp = Blueprint('user', __name__, url_prefix='/user')
 @user_bp.route('/')
 def home():
     routes = Route.query.all()
+
+    origins = sorted(list(set([r.origin for r in routes if r.origin])))
+    destinations = sorted(list(set([r.destination for r in routes if r.destination])))
     schedules = Schedule.query.all()
-
+    selected_schedule_id = request.args.get('selected_schedule_id', type=int)
+    
     selected_bus = None
-    select_id = request.args.get('select_id')
+    if selected_schedule_id:
+        selected_bus = Schedule.query.get(selected_schedule_id)
 
-    if select_id:
-        selected_bus = Schedule.query.get(select_id)
-    return render_template('user/index.html', routes=routes, schedules=schedules, selected_bus=selected_bus)
+    return render_template('user/index.html', 
+                           origins=origins, 
+                           destinations=destinations, 
+                           routes=routes,
+                           schedules=schedules,
+                           selected_bus=selected_bus,
+                           current_date=datetime.now().strftime('%Y-%m-%d'))
 
 # search bus
 @user_bp.route('/search', methods=['GET', 'POST'])
 def search():
     routes = Route.query.all()
+
+    origins = sorted(list(set([r.origin for r in routes if r.origin])))
+    destinations = sorted(list(set([r.destination for r in routes if r.destination])))
 
     origin = request.args.get('origin', '').strip()
     destination = request.args.get('destination', '').strip()
@@ -36,7 +49,7 @@ def search():
         query = query.filter(Route.destination == destination)    
 
     schedules = query.all()
-    return render_template('user/search.html', routes=routes, schedules=schedules, origin=origin, destination=destination, date=date, trip_type=trip_type, return_date=return_date)
+    return render_template('user/search.html', origins=origins, destinations=destinations, routes=routes, schedules=schedules, origin=origin, destination=destination, date=date, trip_type=trip_type, return_date=return_date)
 
 # user profile
 @user_bp.route('/profile', methods=['GET', 'POST'])
