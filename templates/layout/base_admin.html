@@ -138,7 +138,7 @@
             </ul>
 
             <div class="border-top border-secondary pt-3 mt-auto">
-                <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+                <a href="#" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </a>
             </div>
@@ -166,7 +166,12 @@
                             <span class="fw-medium">Admin</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#logoutModal">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -175,6 +180,29 @@
             <!-- Main Body -->
             <div class="p-4">
                 {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <!-- Admin Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="fa-solid fa-right-from-bracket display-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Logout Confirmation</h5>
+                    <p class="text-muted small mb-4">
+                        Are you sure you want to log out of the admin panel?
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light px-4 rounded-3 fw-medium text-secondary border"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger px-4 rounded-3 fw-bold shadow-sm">
+                            Yes, Logout
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -110,8 +110,12 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i
-                                        class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#logoutModal">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     {% else %}
@@ -129,71 +133,99 @@
     </main>
 
     <!-- Footer Modern Design -->
-<footer class="bg-dark text-white pt-5 pb-3 mt-5">
-    <div class="container">
-        <div class="row g-4 justify-content-between">
-            
-            <!-- ផ្នែកទី ១៖ ឈ្មោះ Brand និងសេចក្តីពិពណ៌នា -->
-            <div class="col-lg-4 col-md-6">
-                <h5 class="fw-bold text-white mb-3">
-                    <i class="fa-solid fa-bus text-primary me-2"></i>CamBusBook
-                </h5>
-                <p class="text-white-50 small mb-3">
-                    Your trusted platform for booking bus tickets easily, safely, and comfortably across Cambodia. Enjoy your journey with us.
-                </p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-telegram"></i></a>
-                    <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-tiktok"></i></a>
+    <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row g-4 justify-content-between">
+
+                <!-- ផ្នែកទី ១៖ ឈ្មោះ Brand និងសេចក្តីពិពណ៌នា -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold text-white mb-3">
+                        <i class="fa-solid fa-bus text-primary me-2"></i>CamBusBook
+                    </h5>
+                    <p class="text-white-50 small mb-3">
+                        Your trusted platform for booking bus tickets easily, safely, and comfortably across Cambodia.
+                        Enjoy your journey with us.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <!-- ផ្នែកទី ២៖ តំណភ្ជាប់រហ័ស (Quick Links) -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold text-white mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2">
+                        <li><a href="{{ url_for('user.home') }}" class="text-white-50 text-decoration-none">Home</a>
+                        </li>
+                        <li><a href="{{ url_for('user.search') }}" class="text-decoration-none text-white-50">Search
+                                Buses</a></li>
+                        <li><a href="{{ url_for('booking.my_bookings') }}" class="text-decoration-none text-white-50">My
+                                Bookings</a></li>
+                        <li><a href="{{ url_for('user.profile') }}"
+                                class="text-decoration-none text-white-50">Profile</a></li>
+                    </ul>
+                </div>
+
+                <!-- ផ្នែកទី ৩៖ ទំនាក់ទំនង (Contact Info) -->
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="fw-bold text-white mb-3">Contact Us</h6>
+                    <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2">
+                        <li><i class="fa-solid fa-location-dot text-primary me-2"></i> Phnom Penh, Cambodia</li>
+                        <li><i class="fa-solid fa-phone text-primary me-2"></i> +855 12 345 678</li>
+                        <li><i class="fa-solid fa-envelope text-primary me-2"></i> support@cambusbook.com</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <hr class="border-secondary my-4">
+
+            <!-- ផ្នែកខាងក្រោមបង្អស់ (Copyright) -->
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start small text-white-50">
+                    <p class="mb-0">&copy; 2026 CamBusBook. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end small text-white-50">
+                    <span class="text-white-50">Privacy Policy</span> &bull;
+                    <span class="text-white-50">Terms of Service</span>
                 </div>
             </div>
-
-            <!-- ផ្នែកទី ២៖ តំណភ្ជាប់រហ័ស (Quick Links) -->
-            <div class="col-lg-2 col-md-6">
-                <h6 class="fw-bold text-white mb-3">Quick Links</h6>
-                <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2">
-                    <li><a href="{{ url_for('user.home') }}" class="text-white-50 text-decoration-none">Home</a></li>
-                    <li><a href="{{ url_for('user.search') }}" class="text-decoration-none text-white-50">Search Buses</a></li>
-                    <li><a href="{{ url_for('booking.my_bookings') }}" class="text-decoration-none text-white-50">My Bookings</a></li>
-                    <li><a href="{{ url_for('user.profile') }}" class="text-decoration-none text-white-50">Profile</a></li>
-                </ul>
-            </div>
-
-            <!-- ផ្នែកទី ৩៖ ទំនាក់ទំនង (Contact Info) -->
-            <div class="col-lg-4 col-md-6">
-                <h6 class="fw-bold text-white mb-3">Contact Us</h6>
-                <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2">
-                    <li><i class="fa-solid fa-location-dot text-primary me-2"></i> Phnom Penh, Cambodia</li>
-                    <li><i class="fa-solid fa-phone text-primary me-2"></i> +855 12 345 678</li>
-                    <li><i class="fa-solid fa-envelope text-primary me-2"></i> support@cambusbook.com</li>
-                </ul>
-            </div>
-
         </div>
-
-        <hr class="border-secondary my-4">
-
-        <!-- ផ្នែកខាងក្រោមបង្អស់ (Copyright) -->
-        <div class="row align-items-center">
-            <div class="col-md-6 text-center text-md-start small text-white-50">
-                <p class="mb-0">&copy; 2026 CamBusBook. All rights reserved.</p>
-            </div>
-            <div class="col-md-6 text-center text-md-end small text-white-50">
-                <span class="text-white-50">Privacy Policy</span> &bull; 
-                <span class="text-white-50">Terms of Service</span>
+    </footer>
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="fa-solid fa-right-from-bracket display-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Logout Confirmation</h5>
+                    <p class="text-muted small mb-4">
+                        Are you sure you want to log out of your account?
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light px-4 rounded-3 fw-medium text-secondary border"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger px-4 rounded-3 fw-bold shadow-sm">
+                            Yes, Logout
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</footer>
 
-<!-- CSS បន្ថែមបន្តិចដើម្បីឱ្យ Mouse ទៅលើ Social Icons មានពណ៌ស្អាត -->
-<style>
-    .hover-primary:hover {
-        color: #0d6efd !important;
-        transition: color 0.2s ease-in-out;
-    }
-</style>
+    <!-- CSS បន្ថែមបន្តិចដើម្បីឱ្យ Mouse ទៅលើ Social Icons មានពណ៌ស្អាត -->
+    <style>
+        .hover-primary:hover {
+            color: #0d6efd !important;
+            transition: color 0.2s ease-in-out;
+        }
+    </style>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
