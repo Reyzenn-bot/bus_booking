@@ -51,12 +51,22 @@
                                 <strong class="text-dark">{{ travel_date }} at {{
                                     schedule.departure_time.strftime('%I:%M %p') }}</strong>
                             </div>
+                            <!-- កូដថ្មី (Dynamic Seat / Bed) -->
                             <div class="col-md-6">
-                                <span class="text-muted small d-block">Selected Seat(s)</span>
+                                {% set is_bed = schedule.bus and schedule.bus.type and ('sleeper' in
+                                schedule.bus.type|lower or 'bed' in schedule.bus.type|lower) %}
+
+                                <span class="text-muted small d-block">
+                                    {% if is_bed %}Selected Bed(s){% else %}Selected Seat(s){% endif %}
+                                </span>
+
                                 <span
                                     class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
-                                    {% for seat in seat_numbers %}Seat {{ seat }}{% if not loop.last %}, {% endif %}{%
-                                    endfor %} ({{ seat_numbers|length }} seat(s))
+                                    {% for seat in seat_numbers %}
+                                    {% if is_bed %}Bed {{ seat }}{% else %}Seat {{ seat }}{% endif %}{% if not loop.last
+                                    %}, {% endif %}
+                                    {% endfor %}
+                                    ({{ seat_numbers|length }} {% if is_bed %}bed(s){% else %}seat(s){% endif %})
                                 </span>
                             </div>
                         </div>

@@ -33,7 +33,8 @@
                         <!-- eTicket Main Card -->
                         <div class="card border-0 shadow-lg rounded-4 overflow-hidden" id="eTicketCard{{ b.id }}">
                             <!-- Top Header -->
-                            <div class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center">
+                            <div
+                                class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center">
                                 <div>
                                     <h4 class="fw-bold mb-0 text-warning"><i class="fa-solid fa-bus me-2"></i>CamBusBook
                                     </h4>
@@ -42,12 +43,13 @@
                                 <div class="text-end">
                                     <!-- 📌 បង្ហាញ Badge លោត EXPIRED / CONFIRMED តាមកាលបរិច្ឆេទ -->
                                     {% if is_expired %}
-                                        <span class="badge bg-secondary px-3 py-2 rounded-pill fs-7">EXPIRED</span>
+                                    <span class="badge bg-secondary px-3 py-2 rounded-pill fs-7">EXPIRED</span>
                                     {% else %}
-                                        <span class="badge bg-success px-3 py-2 rounded-pill fs-7">CONFIRMED</span>
+                                    <span class="badge bg-success px-3 py-2 rounded-pill fs-7">CONFIRMED</span>
                                     {% endif %}
-                                    
-                                    <div class="fs-8 text-light-subtle mt-1">Ref: TICK-{{ b.id }}-{{ datetime_now or '0000' }}</div>
+
+                                    <div class="fs-8 text-light-subtle mt-1">Ref: TICK-{{ b.id }}-{{ datetime_now or
+                                        '0000' }}</div>
                                 </div>
                             </div>
 
@@ -58,7 +60,8 @@
                                     <div class="col-md-8 border-end-md">
                                         <!-- Route & Bus -->
                                         <div class="mb-3">
-                                            <span class="text-muted small d-block text-uppercase fw-bold fs-8 mb-1">Bus Company & Route</span>
+                                            <span class="text-muted small d-block text-uppercase fw-bold fs-8 mb-1">Bus
+                                                Company & Route</span>
 
                                             <!-- Bus Company + Logo -->
                                             <div class="d-flex align-items-center gap-2 mb-2">
@@ -77,7 +80,8 @@
                                                     {{ schedule.bus.name if schedule.bus else 'Bus Company' }}
                                                 </h4>
 
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8 ms-1">
+                                                <span
+                                                    class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8 ms-1">
                                                     {{ schedule.bus.type if schedule.bus else '' }}
                                                 </span>
                                             </div>
@@ -92,21 +96,31 @@
                                         <!-- Travel Date, Time & Seat Number -->
                                         <div class="row g-2 mb-3">
                                             <div class="col-6">
-                                                <span class="text-muted small d-block text-uppercase fw-bold fs-8">Travel Date & Time</span>
+                                                <span
+                                                    class="text-muted small d-block text-uppercase fw-bold fs-8">Travel
+                                                    Date & Time</span>
                                                 <strong class="text-dark">{{ travel_date }}</strong><br>
-                                                <small class="text-muted"><strong>Dep: </strong>{{ schedule.departure_time.strftime('%I:%M %p') }}<strong> -> Arr: </strong> {{ schedule.arrival_time.strftime('%I:%M %p')}}</small>
+                                                <small class="text-muted"><strong>Dep: </strong>{{
+                                                    schedule.departure_time.strftime('%I:%M %p') }}<strong> -> Arr:
+                                                    </strong> {{ schedule.arrival_time.strftime('%I:%M %p')}}</small>
                                             </div>
                                             <div class="col-6">
-                                                <span class="text-muted small d-block text-uppercase fw-bold fs-8">Seat Number</span>
+                                                {% set is_bed = schedule.bus and schedule.bus.type and ('sleeper' in
+                                                schedule.bus.type|lower or 'bed' in schedule.bus.type|lower) %}
+
+                                                <span class="text-muted small d-block text-uppercase fw-bold fs-8">
+                                                    {% if is_bed %}Bed Number{% else %}Seat Number{% endif %}
+                                                </span>
                                                 <span class="badge bg-primary text-white px-3 py-2 fs-7 rounded-pill">
-                                                    Seat {{ b.seat_number }}
+                                                    {% if is_bed %}Bed{% else %}Seat{% endif %} {{ b.seat_number }}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <!-- Passenger Details -->
                                         <div class="pt-3 border-top">
-                                            <span class="text-muted small d-block text-uppercase fw-bold fs-8">Passenger Information</span>
+                                            <span class="text-muted small d-block text-uppercase fw-bold fs-8">Passenger
+                                                Information</span>
                                             <strong class="text-dark">{{ passenger_name }}</strong>
                                             <span class="text-muted small">({{ phone }})</span>
                                         </div>
@@ -126,7 +140,8 @@
 
                             <!-- Ticket Footer Note -->
                             <div class="card-footer bg-light p-3 text-center border-top-0">
-                                <small class="text-muted fs-8"><i class="fa-solid fa-circle-info me-1"></i> Please present this e-ticket to the driver before boarding.</small>
+                                <small class="text-muted fs-8"><i class="fa-solid fa-circle-info me-1"></i> Please
+                                    present this e-ticket to the driver before boarding.</small>
                             </div>
                         </div>
 

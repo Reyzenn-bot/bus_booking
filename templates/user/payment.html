@@ -28,8 +28,15 @@
                     </div>
 
                     <h5 class="fw-bold text-dark mt-3 mb-1">BusBookCambo Official</h5>
-                    <p class="text-muted small mb-0">Seat(s): {% for seat in seat_numbers %}Seat {{ seat }}{% if not
-                        loop.last %}, {% endif %}{% endfor %}</p>
+                    {% set is_bed = schedule.bus and schedule.bus.type and ('sleeper' in schedule.bus.type|lower or
+                    'bed' in schedule.bus.type|lower) %}
+
+                    <p class="text-muted small mb-0">
+                        {% if is_bed %}Bed(s){% else %}Seat(s){% endif %}:
+                        {% for seat in seat_numbers %}
+                        {% if is_bed %}Bed{% else %}Seat{% endif %} {{ seat }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
                     <p class="text-muted fs-8">Scan with KHQR supported banking apps</p>
 
                     <hr class="my-4">
