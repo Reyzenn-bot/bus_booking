@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from models import db, User, Booking, Bus, Schedule, Route
 from sqlalchemy import func
 from functools import wraps
+from datetime import date
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -45,6 +46,13 @@ def dashboard():
 @admin_required
 def bookings():
     all_bookings = Booking.query.order_by(Booking.id.desc()).all()
+    
+    today_str = date.today().strftime('%Y-%m-%d')
+
+    for b in all_bookings:
+        t_date = str(b.travel_date) if b.travel_date else ''
+        b.is_expired = t_date < today_str if t_date else False
+
     return render_template('admin/bookings.html', bookings=all_bookings)
 
 # 3. Reject Booking by Admin

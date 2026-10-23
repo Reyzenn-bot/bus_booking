@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, url_for, redirect, request, session, flash
-from datetime import datetime
+from datetime import datetime, date
 from models import db, Booking, Schedule
 
 booking_bp = Blueprint('booking', __name__, url_prefix='/booking')
@@ -188,13 +188,18 @@ def confirm_final_booking():
         # បង្កើត Ticket Reference Code
         ticket_ref = f"TICK-{created_bookings[0].id}-{datetime.now().strftime('%M%S')}"
 
+        # 📌 គណនាពិនិត្យមើលថាតើ travel_date ហួសថ្ងៃបច្ចុប្បន្នហើយឬยัง
+        today_str = date.today().strftime('%Y-%m-%d')
+        is_expired = travel_date_str < today_str if travel_date_str else False
+
         return render_template('user/eTicket.html',
                                bookings=created_bookings,
                                schedule=schedule,
                                travel_date=travel_date_str,
                                passenger_name=passenger_name,
                                phone=phone,
-                               ticket_ref=ticket_ref)
+                               ticket_ref=ticket_ref,
+                               is_expired=is_expired)  # <--- 📌 បញ្ជូន is_expired ទៅទីនេះ
 
     except Exception as e:
         db.session.rollback()
@@ -218,6 +223,7 @@ def my_bookings():
 
     grouped_bookings = []
     seen_groups = set()
+    today_str = date.today().strftime('%Y-%m-%d')  # យកថ្ងៃនេះជា String '2026-10-19'
 
     for b in raw_bookings:
         time_key = b.created_at.strftime('%Y-%m-%d %H:%M') if b.created_at else ''
@@ -235,18 +241,25 @@ def my_bookings():
             total_group_price = sum(float(item.total_price) for item in related_seats)
             first_booking = related_seats[0]
 
+            # 📌 សម្រួលការ Check Expired ឱ្យស្រួល៖ ប្រែក្លាយ travel_date ទៅជា String YYYY-MM-DD
+            t_date = str(first_booking.travel_date) if first_booking.travel_date else ''
+            
+            # បើ t_date (ឧ. '2026-10-18') < today_str ('2026-10-19') វានឹងចេញ True (Expired!)
+            is_expired = t_date < today_str if t_date else False
+
             grouped_bookings.append({
                 'main_booking': first_booking,
                 'seats_display': ", ".join(seat_list),
                 'total_seats_count': len(related_seats),
                 'total_group_price': total_group_price,
-                'booking_ids': [item.id for item in related_seats]
+                'booking_ids': [item.id for item in related_seats],
+                'is_expired': is_expired  # <--- True/False ត្រឹមត្រូវ
             })
 
     return render_template('user/my_bookings.html', grouped_bookings=grouped_bookings)
 
 
-# 7.​ View group eTicket
+# 7. View group eTicket
 @booking_bp.route('/eticket_group/<group_ids>')
 def view_group_eticket(group_ids):
     if 'user_id' not in session:
@@ -262,15 +275,19 @@ def view_group_eticket(group_ids):
 
     first_b = bookings[0]
     schedule = first_b.schedule
-    travel_date_str = first_b.travel_date.strftime('%Y-%m-%d')
+    travel_date_str = first_b.travel_date.strftime('%Y-%m-%d') if first_b.travel_date else ''
+
+    # 📌 គណនាមើលថាតើ travel_date ហួសថ្ងៃបច្ចុប្បន្នហើយឬยัง
+    today_str = date.today().strftime('%Y-%m-%d')
+    is_expired = travel_date_str < today_str if travel_date_str else False
 
     return render_template('user/eTicket.html',
                            bookings=bookings,
                            schedule=schedule,
                            travel_date=travel_date_str,
                            passenger_name=first_b.passenger_name,
-                           phone=first_b.phone)
-
+                           phone=first_b.phone,
+                           is_expired=is_expired)
 
 # 8. Delete group booking
 @booking_bp.route('/delete_group/<group_ids>', methods=['POST'])

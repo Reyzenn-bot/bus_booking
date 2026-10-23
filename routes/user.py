@@ -80,9 +80,12 @@ def profile():
             current_user.phone = new_phone
 
         # Update password only if a new password is provided
-        new_password = request.form.get('password')
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
         if new_password:
-            current_user.password = generate_password_hash(new_password)
+            if not current_password:
+                flash('Please enter your current password tp set a new one.', 'danger')
+                return redirect('user.profile')
 
         try:
             db.session.commit()

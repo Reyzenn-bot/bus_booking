@@ -5,6 +5,14 @@
 {% block content %}
 <div class="container my-4">
 
+    <!-- CSS សម្រាប់កំណត់ឱ្យ Dropdown បង្ហាញត្រឹម ៥ ជម្រើស និងមាន Scrollbar -->
+    <style>
+        #originSelect,
+        #destinationSelect {
+            max-height: 200px;
+        }
+    </style>
+
     <!-- Search Form / Filter Section -->
     <div class="card p-4 shadow-sm border-0 rounded-4 mb-4 bg-white">
 
@@ -25,12 +33,12 @@
         <form action="{{ url_for('user.search') }}" method="GET">
             <div class="row g-2 align-items-end">
 
-                <!-- 1. Origin (From) -->
+                <!-- 1. Origin (From) - បន្ថែម required -->
                 <div class="col-md">
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-solid fa-location-dot text-danger me-1"></i> From
                     </label>
-                    <select name="origin" id="originSelect" class="form-select border-light-subtle"
+                    <select name="origin" id="originSelect" class="form-select border-light-subtle" required
                         onchange="filterDestinations()">
                         <option value="" disabled {% if not origin %}selected{% endif %}>-- Select Origin --</option>
                         {% for org in origins %}
@@ -48,12 +56,12 @@
                     </button>
                 </div>
 
-                <!-- 3. Destination (To) -->
+                <!-- 3. Destination (To) - បន្ថែម required -->
                 <div class="col-md">
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-solid fa-location-crosshairs text-primary me-1"></i> To
                     </label>
-                    <select name="destination" id="destinationSelect" class="form-select border-light-subtle">
+                    <select name="destination" id="destinationSelect" class="form-select border-light-subtle" required>
                         <option value="" disabled {% if not destination %}selected{% endif %}>-- Select Destination --
                         </option>
                         {% for dest in destinations %}
@@ -83,10 +91,10 @@
                         value="{{ request.args.get('return_date', '') }}" disabled>
                 </div>
 
-                <!-- 6. Search / Filter Button -->
+                <!-- 6. Search Button (ប្ដូរពាក្យ Filter Results ទៅជា Search Buses) -->
                 <div class="col-md-auto">
                     <button type="submit" class="btn btn-primary w-100 fw-bold py-2 px-4 rounded-3">
-                        <i class="fa-solid fa-filter me-1"></i> Filter Results
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Search Buses
                     </button>
                 </div>
 
@@ -110,7 +118,8 @@
                 <div class="row align-items-center g-3">
                     <div class="col-md-3">
                         <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
-                            class="rounded-3 w-100 shadow-sm" alt="Bus Image" style="height: 110px; object-fit: cover;">
+                            class="img-fluid rounded-3 object-fit-cover" alt="Bus Image"
+                            style="height: 140px; width: 100%;">
                     </div>
 
                     <div class="col-md-5">
@@ -118,7 +127,7 @@
                             {% if schedule.bus.logo %}
                             <img src="{{ schedule.bus.logo }}" alt="Logo"
                                 class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
-                                style="width: 45px; height: 26px;">
+                                style="width: 70px; height: 45px;">
                             {% else %}
                             <i class="fa-solid fa-bus text-primary fs-6"></i>
                             {% endif %}
@@ -148,7 +157,7 @@
                             <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
                             <span class="text-muted small">/ person</span>
                         </div>
-                        <!-- ប៊ូតុង Dynamic តាមប្រភេទឡាន Seater ឬ Sleeper (គាំទ្រ Round-trip) -->
+                        <!-- ប៊ូតុង Dynamic តាមប្រភេទឡាន Seater ឬ Sleeper -->
                         <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id, trip_type=request.args.get('trip_type', 'oneway'), return_date=request.args.get('return_date', '')) }}"
                             class="btn btn-primary fw-medium rounded-pill px-3 mb-1">
                             {% if schedule.bus.type and 'sleeper' in schedule.bus.type.lower() %}
@@ -186,7 +195,6 @@
 <!-- JavaScript Functions -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. កំណត់កាលបរិច្ឆេទថ្ងៃនេះ (Current Date) សម្រាប់ Departure Date
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0];
 
@@ -200,7 +208,6 @@
             }
         }
 
-        // មុខងារសម្រាប់គណនាកាលបរិច្ឆេទបូកថែម ១ថ្ងៃ
         function getNextDay(dateString) {
             const date = new Date(dateString);
             date.setDate(date.getDate() + 1);
@@ -208,11 +215,9 @@
         }
 
         if (returnInput && departureInput) {
-            // កំណត់តម្លៃអប្បបរមា (min) របស់ Return Date ឱ្យនៅក្រោយ Departure Date ១ ថ្ងៃជានិច្ច
             let nextDayStr = getNextDay(departureInput.value);
             returnInput.setAttribute('min', nextDayStr);
 
-            // បើ User ប្ដូរ Departure Date នោះ Return Date នឹងបូកថែម ១ ថ្ងៃស្វ័យប្រវត្តិ
             departureInput.addEventListener('change', function () {
                 let newMinReturn = getNextDay(departureInput.value);
                 returnInput.setAttribute('min', newMinReturn);
@@ -222,7 +227,6 @@
             });
         }
 
-        // 2. បើក ឬ បិទ Return Date Input តាម One-way / Round-trip
         window.toggleReturnDate = function () {
             const isRoundTrip = document.getElementById('roundtrip');
             const returnLabel = document.getElementById('returnLabel');
@@ -247,7 +251,6 @@
             }
         }
 
-        // 3. មុខងារត្រោះច្រោះឈ្មោះមិនឱ្យស្ទួនគ្នា (Origin & Destination)
         window.filterDestinations = function () {
             const originVal = document.getElementById('originSelect').value;
             const destSelect = document.getElementById('destinationSelect');
@@ -274,7 +277,6 @@
 
         filterDestinations();
 
-        // 4. ប៊ូតុង Swap
         const swapBtn = document.getElementById('swapBtn');
         if (swapBtn) {
             swapBtn.addEventListener('click', function () {

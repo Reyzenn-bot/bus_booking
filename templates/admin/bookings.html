@@ -34,7 +34,8 @@
                     <tbody>
                         {% if bookings %}
                         {% for booking in bookings %}
-                        <tr>
+                        <!-- 📌 រក្សា <tr> ឱ្យនៅធម្មតា មិនប្រើ Class ស្រអាប់លើ Row ទាំងមូលឡើយ -->
+                        <tr class="{% if booking.is_expired %}table-light{% endif %}">
                             <td class="ps-4 fw-bold text-dark">#{{ loop.index }}</td>
                             <td>
                                 <div class="fw-medium text-dark">{{ booking.passenger_name if booking.passenger_name
@@ -63,7 +64,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div>{{ booking.travel_date }}</div>
+                                <div class="text-dark fw-medium">{{ booking.travel_date }}</div>
                                 {% if booking.trip_type == 'roundtrip' and booking.return_date %}
                                 <div class="text-muted small">Return: {{ booking.return_date }}</div>
                                 {% endif %}
@@ -83,7 +84,10 @@
                             </td>
                             <td class="fw-bold text-success">${{ "%.2f"|format(booking.total_price) }}</td>
                             <td>
-                                {% if booking.booking_status.lower() == 'confirmed' %}
+                                <!-- 📌 បង្ហាញ Badge Expired ពណ៌ប្រផេះពេលហួសថ្ងៃ -->
+                                {% if booking.is_expired %}
+                                <span class="badge bg-secondary text-white px-2 py-1">Expired</span>
+                                {% elif booking.booking_status.lower() == 'confirmed' %}
                                 <span
                                     class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Confirmed</span>
                                 {% elif booking.booking_status.lower() == 'pending' %}
@@ -98,16 +102,18 @@
                                     booking.booking_status }}</span>
                                 {% endif %}
                             </td>
+
+                            <!-- 📌 ផ្នែក Actions (Dropdown Menu ភ្លឺច្បាស់ ១០០% ដដែល) -->
                             <td class="text-end pe-4">
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-light border-0" type="button"
-                                        data-bs-toggle="dropdown">
-                                        <i class="fa-solid fa-ellipsis-vertical text-muted"></i>
+                                    <button class="btn btn-sm btn-light border shadow-sm px-2 py-1" type="button"
+                                        data-bs-toggle="dropdown" style="opacity: 1 !important;">
+                                        <i class="fa-solid fa-ellipsis-vertical text-dark"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 opacity-100">
                                         <!-- 1. View Details -->
                                         <li>
-                                            <button class="dropdown-item" data-bs-toggle="modal"
+                                            <button class="dropdown-item fw-medium text-dark" data-bs-toggle="modal"
                                                 data-bs-target="#viewModal{{ booking.id }}">
                                                 <i class="fa-solid fa-eye me-2 text-primary"></i> View Details
                                             </button>
@@ -123,7 +129,7 @@
                                             <form action="{{ url_for('admin.reject_booking', booking_id=booking.id) }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Are you sure you want to reject booking #{{ booking.id }}?');">
-                                                <button type="submit" class="dropdown-item text-warning">
+                                                <button type="submit" class="dropdown-item fw-medium text-warning">
                                                     <i class="fa-solid fa-ban me-2"></i> Reject Booking
                                                 </button>
                                             </form>
@@ -138,7 +144,7 @@
                                             <form action="{{ url_for('admin.delete_booking', booking_id=booking.id) }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Are you sure you want to completely delete booking #{{ booking.id }}?');">
-                                                <button type="submit" class="dropdown-item text-danger">
+                                                <button type="submit" class="dropdown-item fw-medium text-danger">
                                                     <i class="fa-solid fa-trash me-2"></i> Delete Booking
                                                 </button>
                                             </form>

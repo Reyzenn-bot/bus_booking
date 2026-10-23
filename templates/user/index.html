@@ -4,15 +4,93 @@
 
 {% block content %}
 <div class="container my-4">
+    <!-- CSS សម្រាប់កំណត់ឱ្យ Dropdown និង បញ្ជីឡាន (Available Buses) បង្ហាញត្រឹម ៥ និងមាន Scrollbar -->
+    <style>
+        #originSelect,
+        #destinationSelect {
+            max-height: 160px;
+        }
 
-    <!-- Hero Banner -->
-    <div class="card bg-primary text-white p-4 mb-4 rounded-4 shadow-sm border-0 position-relative overflow-hidden">
-        <div class="row align-items-center py-3">
-            <div class="col-lg-8">
-                <h2 class="fw-bold display-6 mb-2">Book Your Bus Ticket<br>Easily & Comfortably</h2>
-                <p class="text-white-50 mb-0">Safe journey &bull; Affordable price &bull; On time</p>
+        /* កំណត់កម្ពស់បញ្ជីឡានឱ្យបង្ហាញប្រហែល ៥ ឡានដំបូង រួចឱ្យមាន Scrollbar ខាងស្តាំ */
+        .available-buses-container {
+            max-height: 900px;
+            /* អាចកែសម្រស់បន្ថែមតាមទំហំ卡드នីមួយៗ */
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* តុបតែង Scrollbar ឱ្យមើលទៅស្អាតនិងទំនើប */
+        .available-buses-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .available-buses-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+
+    <!-- Hero Banner (Auto Sliding 3 Slides) -->
+    <div id="busBannerCarousel" class="carousel slide mb-4 rounded-4 shadow-sm overflow-hidden" data-bs-ride="carousel"
+        data-bs-interval="4000">
+        <!-- Indicators (ចំណុចស្លាយតូចៗខាងក្រោម) -->
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#busBannerCarousel" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#busBannerCarousel" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#busBannerCarousel" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+        </div>
+
+        <!-- Carousel Items -->
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+                <div class="card bg-dark text-white p-5 rounded-0 border-0 position-relative"
+                    style="min-height: 250px; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;">
+                    <div class="py-4 px-3">
+                        <h2 class="fw-bold display-6 mb-2">Book Your Bus Ticket Easily</h2>
+                        <p class="text-white-50 mb-0">Safe journey, affordable price, and on-time service across
+                            Cambodia.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+                <div class="card bg-dark text-white p-5 rounded-0 border-0 position-relative"
+                    style="min-height: 250px; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;">
+                    <div class="py-4 px-3">
+                        <h2 class="fw-bold display-6 mb-2">Explore Destinations Comfortably</h2>
+                        <p class="text-white-50 mb-0">Choose from a wide range of seater and sleeper buses for your
+                            trip.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="carousel-item">
+                <div class="card bg-dark text-white p-5 rounded-0 border-0 position-relative"
+                    style="min-height: 250px; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1557223562-6c77ef1ae280?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;">
+                    <div class="py-4 px-3">
+                        <h2 class="fw-bold display-6 mb-2">Fast & Secure Online Booking</h2>
+                        <p class="text-white-50 mb-0">Book your tickets in advance and get instant electronic tickets
+                            easily.</p>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#busBannerCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#busBannerCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
 
     <!-- Search Form -->
@@ -40,7 +118,8 @@
                     <label class="form-label text-muted small fw-bold mb-1">
                         <i class="fa-solid fa-location-dot text-danger me-1"></i> From
                     </label>
-                    <select name="origin" id="originSelect" class="form-select border-light-subtle" required>
+                    <select name="origin" id="originSelect" class="form-select border-light-subtle" required
+                        onchange="filterDestinations()">
                         <option value="" disabled {% if not request.args.get('origin') %}selected{% endif %}>-- Select
                             Origin --</option>
                         {% for org in origins %}
@@ -104,77 +183,77 @@
         </form>
     </div>
 
-    <!-- Available Buses List -->
+    <!-- Available Buses List (Expanded Full Width with Scrollbar) -->
     <div class="row g-4">
-        <div class="col-lg-8">
+        <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Available Buses</h5>
                 <span class="text-muted small">Showing all available schedules</span>
             </div>
 
             {% if schedules %}
-            {% for schedule in schedules %}
-            <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
-                <div class="row align-items-center g-3">
-                    <div class="col-md-3">
-                        <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
-                            class="img-fluid rounded-3 object-fit-cover" alt="Bus Image"
-                            style="height: 100px; width: 100%;">
-                    </div>
-
-                    <div class="col-md-5">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            {% if schedule.bus.logo %}
-                            <img src="{{ schedule.bus.logo }}" alt="Logo"
-                                class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
-                                style="width: 45px; height: 26px;">
-                            {% else %}
-                            <i class="fa-solid fa-bus text-primary fs-6"></i>
-                            {% endif %}
-
-                            <h6 class="fw-bold mb-0">{{ schedule.bus.name }}</h6>
-
-                            <span
-                                class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8">
-                                {{ schedule.bus.type }}
-                            </span>
+            <!-- បន្ថែម Class available-buses-container ទីនេះដើម្បីឱ្យមាន Scrollbar បង្ហាញត្រឹម ៥ ឡាន -->
+            <div class="available-buses-container">
+                {% for schedule in schedules %}
+                <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-3">
+                            <img src="{{ schedule.bus.image if (schedule.bus and schedule.bus.image) else 'https://via.placeholder.com/150?text=Bus+Image' }}"
+                                class="img-fluid rounded-3 object-fit-cover" alt="Bus Image"
+                                style="height: 140px; width: 100%;">
                         </div>
-                        <div class="d-flex align-items-center gap-2 text-dark fw-bold my-1">
-                            <span>{{ schedule.departure_time.strftime('%I:%M %p') if schedule.departure_time else '-'
-                                }}</span>
-                            <i class="fa-solid fa-arrow-right text-muted fs-7"></i>
-                            <span>{{ schedule.arrival_time.strftime('%I:%M %p') if schedule.arrival_time else '-'
-                                }}</span>
-                        </div>
-                        <p class="text-muted small mb-0">
-                            <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.route.origin }} &rarr; {{
-                            schedule.route.destination }}
-                        </p>
-                    </div>
 
-                    <div class="col-md-4 text-md-end border-start-md">
-                        <div class="mb-2">
-                            <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
-                            <span class="text-muted small">/ person</span>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                {% if schedule.bus.logo %}
+                                <img src="{{ schedule.bus.logo }}" alt="Logo"
+                                    class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
+                                    style="width: 70px; height: 45px;">
+                                {% else %}
+                                <i class="fa-solid fa-bus text-primary fs-6"></i>
+                                {% endif %}
+
+                                <h6 class="fw-bold mb-0">{{ schedule.bus.name }}</h6>
+
+                                <span
+                                    class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8">
+                                    {{ schedule.bus.type }}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 text-dark fw-bold my-1">
+                                <span>{{ schedule.departure_time.strftime('%I:%M %p') if schedule.departure_time else
+                                    '-'
+                                    }}</span>
+                                <i class="fa-solid fa-arrow-right text-muted fs-7"></i>
+                                <span>{{ schedule.arrival_time.strftime('%I:%M %p') if schedule.arrival_time else '-'
+                                    }}</span>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                <i class="fa-solid fa-route text-secondary me-1"></i> {{ schedule.route.origin }} &rarr;
+                                {{
+                                schedule.route.destination }}
+                            </p>
                         </div>
-                        <!-- ប៊ូតុង Select ដើម្បីផ្ញើ ID មកកាន់ Sidebar -->
-                        <a href="{{ url_for('user.home', selected_schedule_id=schedule.id) }}"
-                            class="btn btn-outline-primary fw-medium rounded-pill px-3 me-1 mb-1">
-                            Select
-                        </a>
-                        <!-- ប៊ូតុង Dynamic តាមប្រភេទឡាន Seater ឬ Sleeper -->
-                        <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id) }}"
-                            class="btn btn-primary fw-medium rounded-pill px-3 mb-1">
-                            {% if schedule.bus.type and 'sleeper' in schedule.bus.type.lower() %}
-                            <i class="fa-solid fa-bed me-1"></i> View Bed
-                            {% else %}
-                            <i class="fa-solid fa-chair me-1"></i> View Seats
-                            {% endif %}
-                        </a>
+
+                        <div class="col-md-3 text-md-end border-start-md">
+                            <div class="mb-2">
+                                <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(schedule.price) }}</span>
+                                <span class="text-muted small">/ person</span>
+                            </div>
+                            <!-- ប៊ូតុង Dynamic តាមប្រភេទឡាន Seater ឬ Sleeper -->
+                            <a href="{{ url_for('booking.book_ticket', schedule_id=schedule.id, trip_type=request.args.get('trip_type', 'oneway'), return_date=request.args.get('return_date', '')) }}"
+                                class="btn btn-primary fw-medium rounded-pill px-3 mb-1">
+                                {% if schedule.bus.type and 'sleeper' in schedule.bus.type.lower() %}
+                                <i class="fa-solid fa-bed me-1"></i> View Bed
+                                {% else %}
+                                <i class="fa-solid fa-chair me-1"></i> View Seats
+                                {% endif %}
+                            </a>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
             {% else %}
             <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted">
                 <i class="fa-solid fa-bus-simple fs-1 mb-2 text-secondary"></i>
@@ -182,71 +261,6 @@
             </div>
             {% endif %}
         </div>
-
-        <!-- Sidebar Booking -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 90px;">
-                <h5 class="fw-bold mb-3">Your Booking</h5>
-
-                {% if selected_bus %}
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    {% if selected_bus.bus and selected_bus.bus.logo %}
-                    <img src="{{ selected_bus.bus.logo }}" alt="Logo"
-                        class="rounded-1 object-fit-contain border shadow-sm px-1 bg-white"
-                        style="width: 35px; height: 25px;">
-                    {% else %}
-                    <i class="fa-solid fa-bus text-primary fs-6"></i>
-                    {% endif %}
-
-                    <h6 class="fw-bold mb-0 text-dark">{{ selected_bus.bus.name }}</h6>
-                </div>
-
-                <div class="small text-muted mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Route:</span>
-                        <span class="fw-bold text-dark">{{ selected_bus.route.origin }} &rarr; {{
-                            selected_bus.route.destination }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Departure Time:</span>
-                        <span class="fw-bold text-dark">
-                            {{ selected_bus.departure_time.strftime('%I:%M %p') if selected_bus.departure_time else '-'
-                            }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Ticket Price:</span>
-                        <span class="fw-bold text-dark">${{ "%.2f"|format(selected_bus.price) }}</span>
-                    </div>
-                </div>
-
-                <hr>
-
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="fw-bold text-dark">Total Amount:</span>
-                    <span class="fs-4 fw-bold text-primary">${{ "%.2f"|format(selected_bus.price) }}</span>
-                </div>
-
-                <!-- ប៊ូតុង Dynamic ក្នុង Sidebar តាមប្រភេទឡាន -->
-                <a href="{{ url_for('booking.book_ticket', schedule_id=selected_bus.id) }}"
-                    class="btn btn-primary w-100 fw-bold py-2 rounded-3">
-                    {% if selected_bus.bus.type and 'sleeper' in selected_bus.bus.type.lower() %}
-                    Select Beds & Book <i class="fa-solid fa-arrow-right ms-1"></i>
-                    {% else %}
-                    Select Seats & Book <i class="fa-solid fa-arrow-right ms-1"></i>
-                    {% endif %}
-                </a>
-                {% else %}
-                <div class="text-center py-5 text-muted">
-                    <i class="fa-solid fa-ticket-simple fs-1 text-light-subtle mb-2"></i>
-                    <p class="fw-medium mb-1">Not booking yet</p>
-                    <p class="small text-secondary mb-0">Please click <b>"Select"</b> on any available bus to
-                        proceed.</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
     </div>
 </div>
 
@@ -355,5 +369,4 @@
         }
     });
 </script>
-
 {% endblock %}
