@@ -1,0 +1,208 @@
+{% extends 'layout/base_user.html' %}
+
+{% block title %}eTicket - CamBusBook{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header Alert -->
+            <div class="text-center mb-4">
+                <div class="badge bg-success-subtle text-success p-3 rounded-circle mb-2">
+                    <i class="fa-solid fa-circle-check fs-1"></i>
+                </div>
+                <h3 class="fw-bold text-dark">Payment Successful!</h3>
+                <p class="text-muted">Your booking has been confirmed. Here is your official eTicket.</p>
+            </div>
+
+            <!-- Carousel Wrapper (បំបែកសំបុត្រ ១ កៅអី = ១ Card) -->
+            <div id="ticketCarousel" class="carousel slide mb-4" data-bs-ride="false">
+                <div class="carousel-inner">
+                    {% for b in bookings %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+
+                        <!-- Indicator ករណីមានច្រើនសំបុត្រ (ឧទាហរណ៍ Ticket 1 of 2) -->
+                        {% if bookings|length > 1 %}
+                        <div class="text-center mb-2">
+                            <span class="badge bg-secondary px-3 py-1 rounded-pill">
+                                Ticket {{ loop.index }} of {{ bookings|length }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <!-- eTicket Main Card -->
+                        <div class="card border-0 shadow-lg rounded-4 overflow-hidden" id="eTicketCard{{ b.id }}">
+                            <!-- Top Header -->
+                            <div
+                                class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="fw-bold mb-0 text-warning"><i class="fa-solid fa-bus me-2"></i>CamBusBook
+                                    </h4>
+                                    <span class="fs-8 text-light-subtle">OFFICIAL ELECTRONIC TICKET</span>
+                                </div>
+                                <div class="text-end">
+                                    <!-- 📌 បង្ហាញ Badge លោត EXPIRED / CONFIRMED តាមកាលបរិច្ឆេទ -->
+                                    {% if is_expired %}
+                                    <span class="badge bg-secondary px-3 py-2 rounded-pill fs-7">EXPIRED</span>
+                                    {% else %}
+                                    <span class="badge bg-success px-3 py-2 rounded-pill fs-7">CONFIRMED</span>
+                                    {% endif %}
+
+                                    <div class="fs-8 text-light-subtle mt-1">Ref: TICK-{{ b.id }}-{{ datetime_now or
+                                        '0000' }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Ticket Body -->
+                            <div class="card-body p-4 bg-white">
+                                <div class="row g-4 align-items-center">
+                                    <!-- Left Information Details -->
+                                    <div class="col-md-8 border-end-md">
+                                        <!-- Route & Bus -->
+                                        <div class="mb-3">
+                                            <span class="text-muted small d-block text-uppercase fw-bold fs-8 mb-1">Bus
+                                                Company & Route</span>
+
+                                            <!-- Bus Company + Logo -->
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                {% if schedule.bus and schedule.bus.logo %}
+                                                <img src="{{ schedule.bus.logo }}" alt="Bus Logo"
+                                                    class="rounded-2 border object-fit-contain p-1 bg-white shadow-sm"
+                                                    style="width: 50px; height: 40px; min-width: 45px;">
+                                                {% else %}
+                                                <div class="rounded-2 border bg-light d-flex align-items-center justify-content-center shadow-sm"
+                                                    style="width: 45px; height: 35px; min-width: 45px;">
+                                                    <i class="fa-solid fa-bus text-primary fs-6"></i>
+                                                </div>
+                                                {% endif %}
+
+                                                <h4 class="fw-bold text-dark mb-0">
+                                                    {{ schedule.bus.name if schedule.bus else 'Bus Company' }}
+                                                </h4>
+
+                                                <span
+                                                    class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fs-8 ms-1">
+                                                    {{ schedule.bus.type if schedule.bus else '' }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Route -->
+                                            <div class="text-primary fw-medium fs-6">
+                                                <i class="fa-solid fa-route text-secondary me-1"></i>
+                                                {{ schedule.route.origin }} &rarr; {{ schedule.route.destination }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Travel Date, Time & Seat Number -->
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <span
+                                                    class="text-muted small d-block text-uppercase fw-bold fs-8">Travel
+                                                    Date & Time</span>
+                                                <strong class="text-dark">{{ travel_date }}</strong><br>
+                                                <small class="text-muted"><strong>Dep: </strong>{{
+                                                    schedule.departure_time.strftime('%I:%M %p') }}<strong> -> Arr:
+                                                    </strong> {{ schedule.arrival_time.strftime('%I:%M %p')}}</small>
+                                            </div>
+                                            <div class="col-6">
+                                                {% set is_bed = schedule.bus and schedule.bus.type and ('sleeper' in
+                                                schedule.bus.type|lower or 'bed' in schedule.bus.type|lower) %}
+
+                                                <span class="text-muted small d-block text-uppercase fw-bold fs-8">
+                                                    {% if is_bed %}Bed Number{% else %}Seat Number{% endif %}
+                                                </span>
+                                                <span class="badge bg-primary text-white px-3 py-2 fs-7 rounded-pill">
+                                                    {% if is_bed %}Bed{% else %}Seat{% endif %} {{ b.seat_number }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Passenger Details -->
+                                        <div class="pt-3 border-top">
+                                            <span class="text-muted small d-block text-uppercase fw-bold fs-8">Passenger
+                                                Information</span>
+                                            <strong class="text-dark">{{ passenger_name }}</strong>
+                                            <span class="text-muted small">({{ phone }})</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right QR Code Section -->
+                                    <div class="col-md-4 text-center">
+                                        <div class="bg-light p-2 rounded-3 border d-inline-block mb-2">
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TICK-{{ b.id }}-SEAT{{ b.seat_number }}"
+                                                alt="Ticket Validation QR" class="img-fluid rounded"
+                                                style="width: 150px; height: 150px;">
+                                        </div>
+                                        <p class="text-muted fs-8 mb-0">Scan for verification upon boarding</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ticket Footer Note -->
+                            <div class="card-footer bg-light p-3 text-center border-top-0">
+                                <small class="text-muted fs-8"><i class="fa-solid fa-circle-info me-1"></i> Please
+                                    present this e-ticket to the driver before boarding.</small>
+                            </div>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ប៊ូតុងចុច ឆ្វេង-ស្តាំ (Previous / Next Buttons) -->
+                {% if bookings|length > 1 %}
+                <button class="carousel-control-prev custom-carousel-btn shadow" type="button"
+                    data-bs-target="#ticketCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next custom-carousel-btn shadow" type="button"
+                    data-bs-target="#ticketCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons: Cancel & OK -->
+            <div class="d-flex justify-content-center gap-3 align-items-center mt-4">
+                <a href="{{ url_for('user.home') }}" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-medium">
+                    <i class="fa-solid fa-xmark me-1"></i> Cancel
+                </a>
+                <a href="{{ url_for('booking.my_bookings') }}"
+                    class="btn btn-primary px-5 py-2 rounded-3 fw-bold shadow-sm">
+                    <i class="fa-solid fa-circle-check me-2"></i> OK (My Bookings)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-carousel-btn {
+        width: 45px;
+        height: 45px;
+        background-color: #212529 !important;
+        border-radius: 50%;
+        top: 50% !important;
+        transform: translateY(-50%);
+        opacity: 0.9;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .custom-carousel-btn:hover {
+        background-color: #0d6efd !important;
+        opacity: 1;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-control-prev {
+        left: -65px !important;
+    }
+
+    .carousel-control-next {
+        right: -65px !important;
+    }
+</style>
+{% endblock %}

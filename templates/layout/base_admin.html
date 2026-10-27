@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BusBookCambo Admin Panel{% endblock %}</title>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CamBusBook Admin Panel{% endblock %}</title>
+>>>>>>> serey
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<<<<<<< HEAD
     
     <!-- Style ជាមួយ Media Queries សម្រាប់ Admin Sidebar & Layout -->
     <style>
@@ -42,6 +51,48 @@
         .topbar { 
             background-color: #fff; 
             border-bottom: 1px solid #e2e8f0; 
+=======
+
+    <!-- Style ជាមួយ Media Queries សម្រាប់ Admin Sidebar & Layout -->
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background-color: #0f172a;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 12px 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background-color: #2563eb;
+            border-radius: 8px;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .topbar {
+            background-color: #fff;
+            border-bottom: 1px solid #e2e8f0;
+>>>>>>> serey
         }
 
         /* Media Queries សម្រាប់អេក្រង់ទូរស័ព្ទ/Tablet លើ Admin Panel */
@@ -52,12 +103,24 @@
                 z-index: 999;
                 height: 100%;
             }
+<<<<<<< HEAD
             .sidebar.show {
                 margin-left: 0;
             }
             .topbar-search {
                 width: 100% !important;
             }
+=======
+
+            .sidebar.show {
+                margin-left: 0;
+            }
+
+            .topbar-search {
+                width: 100% !important;
+            }
+
+>>>>>>> serey
             .topbar {
                 flex-direction: column;
                 gap: 10px;
@@ -66,6 +129,7 @@
         }
     </style>
 </head>
+<<<<<<< HEAD
 <body>
 
 <div class="d-flex">
@@ -136,4 +200,147 @@
     });
 </script>
 </body>
+=======
+
+<body>
+
+    <div class="d-flex">
+        <!-- Left Sidebar -->
+        <aside class="sidebar d-flex flex-column p-3 flex-shrink-0" id="adminSidebar">
+            <a href="#" class="d-flex align-items-center gap-2 text-white text-decoration-none px-2 mb-4 fs-5 fw-bold">
+                <i class="fa-solid fa-bus-simple fs-3 me-2"></i> CamBusBook Admin
+            </a>
+
+            <ul class="nav nav-pills flex-column mb-auto gap-1">
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.dashboard') }}"
+                        class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.bookings') }}"
+                        class="nav-link {% if request.endpoint == 'admin.bookings' %}active{% endif %}">
+                        <i class="fa-solid fa-ticket"></i> Bookings
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('bus_admin.index') }}"
+                        class="nav-link {% if 'bus_admin' in request.endpoint %}active{% endif %}">
+                        <i class="fa-solid fa-bus"></i> Buses
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('route_admin.index') }}"
+                        class="nav-link {% if 'route_admin' in request.endpoint %}active{% endif %}">
+                        <i class="fa-solid fa-route"></i> Routes
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.passengers') }}"
+                        class="nav-link {% if request.endpoint == 'admin.passengers' %}active{% endif %}">
+                        <i class="fa-solid fa-users"></i> Passengers
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('schedule_admin.index') }}"
+                        class="nav-link {% if 'schedule_admin' in request.endpoint %}active{% endif %}">
+                        <i class="fa-solid fa-calendar-days me-2"></i> Schedules
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.users') }}"
+                        class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}">
+                        <i class="fa-solid fa-user-gear"></i> Users
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.reports') }}"
+                        class="nav-link {% if request.endpoint == 'admin.reports' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> Reports
+                    </a>
+                </li>
+            </ul>
+
+            <div class="border-top border-secondary pt-3 mt-auto">
+                <a href="#" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content d-flex flex-column">
+            <!-- Topbar -->
+            <header class="topbar px-4 py-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-light border-0" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+                    <div class="input-group topbar-search" style="width: 320px;">
+                        <span class="input-group-text bg-light border-0"><i
+                                class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" class="form-control bg-light border-0"
+                            placeholder="Search bookings, passengers, buses...">
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border-0"
+                            type="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
+                            <span class="fw-medium">Admin</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#logoutModal">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Body -->
+            <div class="p-4">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <!-- Admin Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="fa-solid fa-right-from-bracket display-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Logout Confirmation</h5>
+                    <p class="text-muted small mb-4">
+                        Are you sure you want to log out of the admin panel?
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light px-4 rounded-3 fw-medium text-secondary border"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger px-4 rounded-3 fw-bold shadow-sm">
+                            Yes, Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle Sidebar លើ Mobile
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.getElementById('adminSidebar').classList.toggle('show');
+        });
+    </script>
+</body>
+
+>>>>>>> serey
 </html>

@@ -1,6 +1,10 @@
 {% extends "layout/base_user.html" %}
 
+<<<<<<< HEAD
 {% block title %}My Profile - BusBookCambo{% endblock %}
+=======
+{% block title %}My Profile - CamBusBook{% endblock %}
+>>>>>>> serey
 
 {% block content %}
 <div class="container my-4">
@@ -8,6 +12,7 @@
         <div class="col-md-8 col-lg-6">
 
             {% with messages = get_flashed_messages(with_categories=true) %}
+<<<<<<< HEAD
                 {% if messages %}
                     {% for category, message in messages %}
                         <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show rounded-3 mb-3" role="alert">
@@ -16,6 +21,17 @@
                         </div>
                     {% endfor %}
                 {% endif %}
+=======
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show rounded-3 mb-3"
+                role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+>>>>>>> serey
             {% endwith %}
 
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -58,10 +74,25 @@
                             <i class="fa-solid fa-lock text-primary me-2"></i>Change Password (Optional)
                         </h6>
 
+<<<<<<< HEAD
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold mb-1">New Password</label>
                             <input type="password" name="password" class="form-control rounded-3"
                                 placeholder="Leave blank if you don't want to change">
+=======
+                        <!-- 1. current Password -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold mb-1">Current Password</label>
+                            <input type="password" name="current_password" class="form-control rounded-3"
+                                placeholder="Enter current password to change">
+                        </div>
+
+                        <!-- 2. new Password  -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold mb-1">New Password</label>
+                            <input type="password" name="new_password" class="form-control rounded-3"
+                                placeholder="Enter new password">
+>>>>>>> serey
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
@@ -69,6 +100,15 @@
                                 <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
                             </button>
                         </div>
+<<<<<<< HEAD
+=======
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="button" class="btn btn-outline-danger fw-bold py-2 rounded-3"
+                                data-bs-toggle="modal" data-bs-target="#logoutModal">
+                                <i class="fa-solid fa-right-from-bracket me-2"></i> Logout Account
+                            </button>
+                        </div>
+>>>>>>> serey
                     </form>
 
                 </div>

@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+from datetime import datetime
+
+>>>>>>> serey
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
@@ -5,7 +10,11 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+<<<<<<< HEAD
     name = db.Column(db.String(50), unique=True, nullable=False)
+=======
+    name = db.Column(db.String(50), nullable=False)
+>>>>>>> serey
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(20), nullable=True)
@@ -30,6 +39,10 @@ class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     origin = db.Column(db.String(50), nullable=False)
     destination = db.Column(db.String(50), nullable=False)
+<<<<<<< HEAD
+=======
+    via = db.Column(db.String(50), nullable=True)
+>>>>>>> serey
     distance = db.Column(db.Integer, nullable=True)  # Distance between origin and destination
     schedules = db.relationship('Schedule', backref='route', lazy=True)  # Relationship to Schedule
 
@@ -41,7 +54,13 @@ class Schedule(db.Model):
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id'), nullable=False)
     departure_time = db.Column(db.Time, nullable=False)  # e.g., '2023-10-01 10:00:00'
     arrival_time = db.Column(db.Time, nullable=False)  # e.g., '2023-10-01 14:00:00'
+<<<<<<< HEAD
     price = db.Column(db.Decimal(10, 2), nullable=False)  # Price for the schedule
+=======
+    price = db.Column(db.Numeric(10, 2), nullable=False)  # Price for the schedule
+    bookings = db.relationship('Booking', foreign_keys='Booking.schedule_id', backref='schedule', lazy=True)  # Relationship to Booking
+    return_bookings = db.relationship('Booking', foreign_keys='Booking.return_schedule_id', backref='return_schedule', lazy=True)  # Relationship to Booking for return trips
+>>>>>>> serey
 
 #5. Bookings table
 class Booking(db.Model):
@@ -52,7 +71,23 @@ class Booking(db.Model):
     travel_date = db.Column(db.Date, nullable=False)  # Date of travel
     seat_number = db.Column(db.Integer, nullable=False)  # Seat number booked
     passenger_count = db.Column(db.Integer, nullable=False)  # Number of passengers
+<<<<<<< HEAD
     ticket_price = db.Column(db.Decimal(10, 2), nullable=False)  # Total ticket price
     service_price = db.Column(db.Decimal(10, 2), nullable=False)  # Service price
     total_price = db.Column(db.Decimal(10, 2), nullable=False)  # Total price (ticket + service)
     booking_status = db.Column(db.String(50), nullable=False, default='confirmed')  # e.g., 'pending', 'confirmed', 'cancelled'
+=======
+    ticket_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total ticket price
+    service_fee = db.Column(db.Numeric(10, 2), nullable=False)  # Service price
+    total_price = db.Column(db.Numeric(10, 2), nullable=False)  # Total price (ticket + service)
+    booking_status = db.Column(db.String(50), nullable=False, default='confirmed')  # e.g., 'pending', 'confirmed', 'cancelled'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow) # Booking creation timestamp
+    trip_type = db.Column(db.String(20), nullable=False, default='oneway')  # 'oneway' ឬ 'roundtrip'
+    return_date = db.Column(db.Date, nullable=True)  # ថ្ងៃត្រឡប់មកវិញ (បើជា Round-trip)
+    return_schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), nullable=True)  # កាលវិភាគឡានត្រឡប់មកវិញ (បើមាន)
+    passenger_name = db.Column(db.String(50), nullable=True)
+    age = db.Column(db.Integer, nullable=True)
+    gender = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(255), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)
+>>>>>>> serey

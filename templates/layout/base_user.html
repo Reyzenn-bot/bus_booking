@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BusBookCambo - Online Bus Ticket Booking{% endblock %}</title>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CamBusBook - Online Bus Ticket Booking{% endblock %}</title>
+>>>>>>> serey
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<<<<<<< HEAD
     
+=======
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+>>>>>>> serey
     <!-- CSS Style ជាមួយ Media Queries ក្នុង File HTML ផ្ទាល់ -->
     <style>
         :root {
@@ -27,6 +41,10 @@
             .navbar-nav {
                 padding-top: 15px;
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> serey
             .hero-banner {
                 padding: 40px 15px !important;
                 text-align: center;
@@ -37,23 +55,41 @@
             .search-box {
                 padding: 15px !important;
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> serey
             .bus-card-body {
                 flex-direction: column;
                 text-align: center;
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> serey
             .bus-price {
                 font-size: 1.25rem !important;
             }
         }
     </style>
 </head>
+<<<<<<< HEAD
+=======
+
+>>>>>>> serey
 <body class="bg-light">
 
     <!-- Header / Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2">
         <div class="container">
+<<<<<<< HEAD
             <a class="navbar-brand d-flex align-items-center text-primary fw-bold fs-4" href="{{ url_for('home') }}">
                 <i class="fa-solid fa-bus-simple fs-3 me-2"></i> BusBookCambo
+=======
+            <a class="navbar-brand d-flex align-items-center text-primary fw-bold fs-4"
+                href="{{ url_for('user.home') }}">
+                <i class="fa-solid fa-bus-simple fs-3 me-2"></i> CamBusBook
+>>>>>>> serey
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userNavbar">
@@ -63,22 +99,43 @@
             <div class="collapse navbar-collapse" id="userNavbar">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium">
                     <li class="nav-item me-3">
+<<<<<<< HEAD
                         <a class="nav-link active" href="{{ url_for('home') }}">
+=======
+                        <a class="nav-link {% if request.path == url_for('user.home') or request.path == '/' %}text-dark fw-bold active{% else %}text-secondary{% endif %}"
+                            href="{{ url_for('user.home') }}">
+>>>>>>> serey
                             <i class="fa-solid fa-house me-1"></i> Home
                         </a>
                     </li>
                     <li class="nav-item me-3">
+<<<<<<< HEAD
                         <a class="nav-link text-secondary" href="#">
                             <i class="fa-solid fa-ticket me-1"></i> Book Ticket
                         </a>
                     </li>
                     <li class="nav-item me-3">
                         <a class="nav-link text-secondary" href="#">
+=======
+                        <a class="nav-link {% if 'search' in request.path %}text-dark fw-bold active{% else %}text-secondary{% endif %}"
+                            href="{{ url_for('user.search') }}">
+                            <i class="fa-solid fa-ticket me-1"></i> Search Bus
+                        </a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link {% if 'booking' in request.path %}text-dark fw-bold active{% else %}text-secondary{% endif %}"
+                            href="{{ url_for('booking.my_bookings') }}">
+>>>>>>> serey
                             <i class="fa-solid fa-list-check me-1"></i> My Bookings
                         </a>
                     </li>
                     <li class="nav-item me-3">
+<<<<<<< HEAD
                         <a class="nav-link text-secondary" href="#">
+=======
+                        <a class="nav-link {% if 'profile' in request.path %}text-dark fw-bold active{% else %}text-secondary{% endif %}"
+                            href="{{ url_for('user.profile') }}">
+>>>>>>> serey
                             <i class="fa-regular fa-user me-1"></i> Profile
                         </a>
                     </li>
@@ -86,6 +143,7 @@
 
                 <div class="d-flex align-items-center gap-3">
                     {% if session.get('user_id') %}
+<<<<<<< HEAD
                         <div class="dropdown">
                             <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
@@ -100,6 +158,31 @@
                     {% else %}
                         <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary px-3 rounded-pill">Login</a>
                         <a href="#" class="btn btn-primary px-3 rounded-pill">Register</a>
+=======
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3"
+                            type="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-circle-user fs-4 text-primary"></i>
+                            <span>{{ session.get('user_name', 'User') }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="{{ url_for('user.profile') }}"><i
+                                        class="fa-regular fa-id-card me-2"></i>My Profile</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#logoutModal">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary px-3 rounded-pill">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary px-3 rounded-pill">Register</a>
+>>>>>>> serey
                     {% endif %}
                 </div>
             </div>
@@ -111,14 +194,115 @@
         {% block content %}{% endblock %}
     </main>
 
+<<<<<<< HEAD
     <!-- Footer -->
     <footer class="bg-white border-top py-4 mt-5">
         <div class="container text-center text-muted fs-7">
             <p class="mb-0">BusBookCambo Panel &copy; 2026 All rights reserved.</p>
         </div>
     </footer>
+=======
+    <!-- Footer Modern Design -->
+    <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row g-4 justify-content-between">
+
+                <!-- ផ្នែកទី ១៖ ឈ្មោះ Brand និងសេចក្តីពិពណ៌នា -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold text-white mb-3">
+                        <i class="fa-solid fa-bus text-primary me-2"></i>CamBusBook
+                    </h5>
+                    <p class="text-white-50 small mb-3">
+                        Your trusted platform for booking bus tickets easily, safely, and comfortably across Cambodia.
+                        Enjoy your journey with us.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="text-white-50 fs-5 hover-primary"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <!-- ផ្នែកទី ២៖ តំណភ្ជាប់រហ័ស (Quick Links) -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold text-white mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2">
+                        <li><a href="{{ url_for('user.home') }}" class="text-white-50 text-decoration-none">Home</a>
+                        </li>
+                        <li><a href="{{ url_for('user.search') }}" class="text-decoration-none text-white-50">Search
+                                Buses</a></li>
+                        <li><a href="{{ url_for('booking.my_bookings') }}" class="text-decoration-none text-white-50">My
+                                Bookings</a></li>
+                        <li><a href="{{ url_for('user.profile') }}"
+                                class="text-decoration-none text-white-50">Profile</a></li>
+                    </ul>
+                </div>
+
+                <!-- ផ្នែកទី ৩៖ ទំនាក់ទំនង (Contact Info) -->
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="fw-bold text-white mb-3">Contact Us</h6>
+                    <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2">
+                        <li><i class="fa-solid fa-location-dot text-primary me-2"></i> Phnom Penh, Cambodia</li>
+                        <li><i class="fa-solid fa-phone text-primary me-2"></i> +855 12 345 678</li>
+                        <li><i class="fa-solid fa-envelope text-primary me-2"></i> support@cambusbook.com</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <hr class="border-secondary my-4">
+
+            <!-- ផ្នែកខាងក្រោមបង្អស់ (Copyright) -->
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start small text-white-50">
+                    <p class="mb-0">&copy; 2026 CamBusBook. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end small text-white-50">
+                    <span class="text-white-50">Privacy Policy</span> &bull;
+                    <span class="text-white-50">Terms of Service</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="fa-solid fa-right-from-bracket display-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Logout Confirmation</h5>
+                    <p class="text-muted small mb-4">
+                        Are you sure you want to log out of your account?
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light px-4 rounded-3 fw-medium text-secondary border"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger px-4 rounded-3 fw-bold shadow-sm">
+                            Yes, Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSS បន្ថែមបន្តិចដើម្បីឱ្យ Mouse ទៅលើ Social Icons មានពណ៌ស្អាត -->
+    <style>
+        .hover-primary:hover {
+            color: #0d6efd !important;
+            transition: color 0.2s ease-in-out;
+        }
+    </style>
+>>>>>>> serey
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<<<<<<< HEAD
+=======
+
+>>>>>>> serey
 </html>
